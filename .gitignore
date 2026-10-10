@@ -1,0 +1,19 @@
+# deps
+node_modules/
+
+# builds
+dist/
+client/dist/
+
+# env
+.env
+.env.local
+*.local
+
+# drizzle
+drizzle/*.sql
+!drizzle/0000_*.sql
+
+# misc
+.DS_Store
+*.log
