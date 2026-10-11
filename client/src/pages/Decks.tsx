@@ -67,6 +67,11 @@ function NewDeckModal({ onClose, onCreated }: { onClose: () => void; onCreated: 
       const { text, truncated } = await extractPdfText(file);
       setTextContent(text);
       setPdfTruncated(truncated);
+      if (!text.trim()) {
+        // Scanned/image PDFs extract zero text — the generate button would stay
+        // disabled with no explanation. Say so instead of leaving the user stuck.
+        setError(t("decks.pdfEmpty"));
+      }
     } catch {
       setError(t("decks.pdfError"));
     } finally {
