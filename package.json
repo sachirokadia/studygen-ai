@@ -1,1 +1,33 @@
-{"description":"StudyGen AI — turn anything into study material and actually remember it.","engines":{"node":">=20"},"name":"studygen-ai","private":true,"scripts":{"build":"npm run build --workspace=server && npm run build --workspace=client","db:generate":"npm run db:generate --workspace=server","db:migrate":"npm run db:migrate --workspace=server","dev:server":"npm run dev --workspace=server","seed":"npm run seed --workspace=server","typecheck":"npm run typecheck --workspace=server"},"version":"0.1.0","workspaces":["client","server"]}
+{
+  "description": "StudyGen AI \u2014 turn anything into study material and actually remember it.",
+  "engines": {
+    "node": ">=20"
+  },
+  "name": "studygen-ai",
+  "private": true,
+  "scripts": {
+    "build": "npm run build --workspace=server && npm run build --workspace=client",
+    "db:generate": "npm run db:generate --workspace=server",
+    "db:migrate": "npm run db:migrate --workspace=server",
+    "dev:server": "npm run dev --workspace=server",
+    "seed": "npm run seed --workspace=server",
+    "typecheck": "npm run typecheck --workspace=server"
+  },
+  "version": "0.1.0",
+  "workspaces": [
+    "client",
+    "server"
+  ],
+  "dependencies": {
+    "@neondatabase/serverless": "^1.0.3",
+    "bcryptjs": "^3.0.3",
+    "cors": "^2.8.5",
+    "dotenv": "^17.2.3",
+    "drizzle-orm": "^0.45.4",
+    "express": "^5.2.1",
+    "jsonwebtoken": "^9.0.3",
+    "serverless-http": "^4.0.0",
+    "youtube-transcript": "^1.2.1",
+    "zod": "^4.1.12"
+  }
+}

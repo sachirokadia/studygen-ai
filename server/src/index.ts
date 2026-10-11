@@ -18,6 +18,17 @@ export function createApp(): express.Express {
   app.use(cors());
   app.use(express.json({ limit: "2mb" }));
 
+  // Vercel rewrites /api/* → /api/index; strip the /api prefix so routes match
+  // whether the function receives the pre- or post-rewrite path.
+  app.use((req, _res, next) => {
+    if (req.url === "/api") {
+      req.url = "/";
+    } else if (req.url.startsWith("/api/")) {
+      req.url = req.url.slice(4);
+    }
+    next();
+  });
+
   app.get("/health", (_req, res) => {
     res.json({ ok: true, service: "studygen-api" });
   });
