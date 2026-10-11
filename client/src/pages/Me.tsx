@@ -1,5 +1,5 @@
 import { Link, useNavigate } from "react-router-dom";
-import { Bookmark, LogOut, Map, MessageCircle, ShieldCheck, Sparkles, StickyNote } from "lucide-react";
+import { Bookmark, LogOut, Map, MessageCircle, ShieldCheck, Sparkles, StickyNote, Timer } from "lucide-react";
 import clsx from "clsx";
 import { useAuth } from "../lib/auth";
 import { useLang, type Lang } from "../lib/i18n";
@@ -14,9 +14,10 @@ export default function Me() {
   const rows = [
     { to: "/notes", label: t("nav.notes"), icon: StickyNote, color: "bg-btnpink" },
     { to: "/paths", label: t("nav.paths"), icon: Map, color: "bg-machinepurple" },
-    { to: "/explain", label: t("nav.explain"), icon: Sparkles, color: "bg-sky" },
-    { to: "/chat", label: t("nav.chat"), icon: MessageCircle, color: "bg-btnyellow" },
-    { to: "/bookmarks", label: t("nav.bookmarks"), icon: Bookmark, color: "bg-grass" },
+    { to: "/focus", label: t("me.focus"), icon: Timer, color: "bg-sky" },
+    { to: "/explain", label: t("nav.explain"), icon: Sparkles, color: "bg-btnyellow" },
+    { to: "/chat", label: t("nav.chat"), icon: MessageCircle, color: "bg-grass" },
+    { to: "/bookmarks", label: t("nav.bookmarks"), icon: Bookmark, color: "bg-btnpink" },
   ];
 
   const handleLogout = () => {

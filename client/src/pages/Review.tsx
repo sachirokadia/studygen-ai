@@ -4,6 +4,7 @@ import { api, type Flashcard } from "../lib/api";
 import { useLang } from "../lib/i18n";
 import { Button, Card, EmptyState, ErrorState, LoadingState, PageBg, PageHeader, Pill } from "../components/ui";
 import Creature, { type CreatureKind } from "../components/creatures";
+import { ClozeText, hasCloze, stripCloze } from "../lib/cloze";
 
 // Two simple choices. NEED PRACTICE = grade 2, GOT IT! = grade 4.
 export default function Review() {
@@ -103,9 +104,28 @@ export default function Review() {
               className="paper-card mx-auto max-w-2xl rotate-[1.5deg] cursor-pointer p-8 text-center"
             >
               <div className="flex min-h-[200px] flex-col items-center justify-center text-center">
-                <p className="font-display text-3xl font-extrabold leading-snug">{flipped ? card.back : card.front}</p>
-                {!flipped && (
-                  <p className="mt-6 font-body text-sm font-bold text-ink/50">{t("review.tapToFlip")}</p>
+                {!flipped ? (
+                  <>
+                    <p className="font-display text-3xl font-extrabold leading-snug">
+                      {hasCloze(card.front) ? (
+                        <ClozeText text={card.front} revealed={false} />
+                      ) : (
+                        card.front
+                      )}
+                    </p>
+                    <p className="mt-6 font-body text-sm font-bold text-ink/50">{t("review.tapToFlip")}</p>
+                  </>
+                ) : (
+                  <>
+                    {hasCloze(card.front) && (
+                      <p className="font-display text-3xl font-extrabold leading-snug">
+                        <ClozeText text={card.front} revealed={true} />
+                      </p>
+                    )}
+                    <p className="mt-4 font-body text-xl font-bold text-ink/80">
+                      {stripCloze(card.back)}
+                    </p>
+                  </>
                 )}
               </div>
             </div>

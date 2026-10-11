@@ -1195,6 +1195,13 @@ async function handleYoutubeTranscript(userId, query) {
 // admin
 // ---------------------------------------------------------------------------
 
+async function requireAdmin(userId) {
+  const db = getSql();
+  const me = await db`SELECT role FROM users WHERE id = ${userId} LIMIT 1`;
+  if (!me[0] || me[0].role !== "admin")
+    throw new HttpError(403, "Admin access required");
+}
+
 async function handleAdminStats(userId) {
   const db = getSql();
   const me = await db`SELECT role FROM users WHERE id = ${userId} LIMIT 1`;
@@ -1212,6 +1219,40 @@ async function handleAdminStats(userId) {
       decks: Number(d[0]?.n ?? 0),
       cards: Number(c[0]?.n ?? 0),
     },
+  };
+}
+
+async function handleAdminUsers(userId) {
+  await requireAdmin(userId);
+  const db = getSql();
+  const rows = await db`SELECT id, email, name, role, created_at FROM users ORDER BY created_at ASC`;
+  return {
+    status: 200,
+    body: rows.map((u) => ({
+      id: u.id,
+      email: u.email,
+      name: u.name,
+      role: u.role,
+      createdAt: u.created_at,
+    })),
+  };
+}
+
+async function handleAdminUserRole(userId, targetId, body) {
+  await requireAdmin(userId);
+  if (!isUuid(targetId)) throw new HttpError(404, "User not found");
+  const { role } = body || {};
+  if (role !== "admin" && role !== "user")
+    throw new HttpError(400, "Invalid role");
+  if (targetId === userId && role !== "admin")
+    throw new HttpError(400, "You can't remove your own admin powers");
+  const db = getSql();
+  const rows = await db`UPDATE users SET role = ${role} WHERE id = ${targetId} RETURNING id, email, name, role`;
+  if (!rows.length) throw new HttpError(404, "User not found");
+  const u = rows[0];
+  return {
+    status: 200,
+    body: { id: u.id, email: u.email, name: u.name, role: u.role },
   };
 }
 
@@ -1283,6 +1324,11 @@ async function route(req) {
 
   // admin
   if (method === "GET" && path === "/api/admin/stats") return handleAdminStats(userId);
+  if (method === "GET" && path === "/api/admin/users") return handleAdminUsers(userId);
+  const adminUserMatch = path.match(/^\/api\/admin\/users\/([^/]+)$/);
+  if (adminUserMatch && method === "PATCH") {
+    return handleAdminUserRole(userId, adminUserMatch[1], await readBody(req));
+  }
 
   // quizzes — specific sub-routes before :id
   if (method === "POST" && path === "/api/quizzes") {

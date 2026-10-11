@@ -138,6 +138,14 @@ export interface AdminStats {
   cards: number;
 }
 
+export interface AdminUser {
+  id: string;
+  email: string;
+  name: string;
+  role: string;
+  createdAt: string;
+}
+
 export class ApiError extends Error {
   status: number;
   constructor(status: number, message: string) {

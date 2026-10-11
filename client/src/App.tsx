@@ -22,6 +22,8 @@ import Chat from "./pages/Chat";
 import Bookmarks from "./pages/Bookmarks";
 import Admin from "./pages/Admin";
 import Me from "./pages/Me";
+import PrintDeck from "./pages/PrintDeck";
+import Focus from "./pages/Focus";
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -47,6 +49,14 @@ export default function App() {
               <Route path="/login" element={<Login />} />
               <Route path="/register" element={<Register />} />
               <Route
+                path="/decks/:id/print"
+                element={
+                  <Protected>
+                    <PrintDeck />
+                  </Protected>
+                }
+              />
+              <Route
                 path="/*"
                 element={
                   <Protected>
@@ -59,6 +69,7 @@ export default function App() {
                         <Route path="/quiz/:id" element={<QuizTake />} />
                         <Route path="/quiz/:id/review" element={<QuizReview />} />
                         <Route path="/notes" element={<Notes />} />
+                        <Route path="/focus" element={<Focus />} />
                         <Route path="/paths" element={<Paths />} />
                         <Route path="/paths/:id" element={<PathDetail />} />
                         <Route path="/explain" element={<Explain />} />

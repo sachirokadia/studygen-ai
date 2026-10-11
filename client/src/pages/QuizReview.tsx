@@ -1,5 +1,7 @@
+import { useState } from "react";
 import { Link, useParams } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
+import clsx from "clsx";
 import { api, type Quiz, type QuizAttempt } from "../lib/api";
 import { useLang } from "../lib/i18n";
 import { Button, EmptyState, ErrorState, LoadingState, PageBg } from "../components/ui";
@@ -25,6 +27,7 @@ function Stars({ pct }: { pct: number }) {
 export default function QuizReview() {
   const { id } = useParams<{ id: string }>();
   const { t } = useLang();
+  const [showAnswers, setShowAnswers] = useState(false);
 
   const quizQ = useQuery({ queryKey: ["quiz", id], queryFn: () => api.get<Quiz>(`/quizzes/${id}`), enabled: !!id });
   const attemptsQ = useQuery({
@@ -53,6 +56,9 @@ export default function QuizReview() {
 
   const pct = attempt.total > 0 ? Math.round((attempt.score / attempt.total) * 100) : 0;
 
+  const questions = quiz.questions ?? [];
+  const answerByQid = new Map(attempt.answers.map((a) => [a.questionId, a.selected]));
+
   return (
     <div className="mx-auto max-w-xl">
       <PageBg variant="night" />
@@ -63,6 +69,16 @@ export default function QuizReview() {
         <p className="mt-1 font-display text-6xl font-extrabold">
           {attempt.score} {t("quiz.outOf")} {attempt.total}!
         </p>
+
+        {questions.length > 0 && (
+          <button
+            onClick={() => setShowAnswers((s) => !s)}
+            className="mt-4 font-display text-lg font-extrabold text-ink/60 underline decoration-btnyellow decoration-[3px] underline-offset-4"
+          >
+            {showAnswers ? t("quiz.hideAnswers") : t("quiz.seeAnswers")} {showAnswers ? "▲" : "▼"}
+          </button>
+        )}
+
         <Link to={`/quiz/${id}`} className="mt-6 block">
           <Button variant="green" className="w-full !py-4 !text-2xl">
             {t("quiz.practiceAgain")}
@@ -72,6 +88,58 @@ export default function QuizReview() {
           {t("btn.back")}
         </Link>
       </div>
+
+      {showAnswers && (
+        <div className="mt-6 space-y-4 pb-10">
+          {questions.map((q, i) => {
+            const picked = answerByQid.get(q.id);
+            const correct = picked === q.correctIndex;
+            return (
+              <div key={q.id} className="paper-card !p-5">
+                <p className="font-display text-xl font-extrabold leading-snug">
+                  {i + 1}. {q.question}
+                </p>
+                <div className="mt-3 space-y-2">
+                  {q.options.map((opt, oi) => {
+                    const isPicked = picked === oi;
+                    const isRight = oi === q.correctIndex;
+                    return (
+                      <div
+                        key={oi}
+                        className={clsx(
+                          "rounded-xl border-[3px] px-3 py-2 font-body text-sm font-bold",
+                          isRight
+                            ? "border-ink bg-grass/40"
+                            : isPicked
+                              ? "border-ink bg-btnpink/40"
+                              : "border-ink/20 bg-paper",
+                        )}
+                      >
+                        {opt}
+                        {isRight && <span className="ml-2">✓ {t("quiz.rightAnswer")}</span>}
+                        {isPicked && !isRight && (
+                          <span className="ml-2">← {t("quiz.youPicked")}</span>
+                        )}
+                      </div>
+                    );
+                  })}
+                </div>
+                {!correct && picked !== undefined && (
+                  <p className="mt-2 font-body text-sm font-bold text-ink/60">
+                    {t("quiz.youPicked")}: {q.options[picked] ?? "—"}
+                  </p>
+                )}
+                {q.explanation && (
+                  <p className="mt-3 border-t-[3px] border-dashed border-ink/20 pt-2 font-body text-sm font-semibold text-ink/70">
+                    <span className="font-extrabold">{t("quiz.explanation")}: </span>
+                    {q.explanation}
+                  </p>
+                )}
+              </div>
+            );
+          })}
+        </div>
+      )}
     </div>
   );
 }

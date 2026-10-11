@@ -1,5 +1,5 @@
 {
-  "description": "StudyGen AI \u2014 turn anything into study material and actually remember it.",
+  "description": "StudyGen AI — turn anything into study material and actually remember it.",
   "engines": {
     "node": ">=20"
   },
@@ -29,5 +29,8 @@
     "serverless-http": "^4.0.0",
     "youtube-transcript": "^1.2.1",
     "zod": "^4.1.12"
+  },
+  "devDependencies": {
+    "@types/sql.js": "^1.4.11"
   }
 }

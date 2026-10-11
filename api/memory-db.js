@@ -82,6 +82,22 @@ function execute(rawSql, values) {
   if (sql === "SELECT COUNT(*)::int AS n FROM users") {
     return [{ n: tables.users.length }];
   }
+  if (sql.startsWith("SELECT id, email, name, role, created_at FROM users")) {
+    return [...tables.users]
+      .sort((a, b) => (a.created_at < b.created_at ? -1 : 1))
+      .map((u) => ({
+        id: u.id,
+        email: u.email,
+        name: u.name,
+        role: u.role,
+        created_at: u.created_at,
+      }));
+  }
+  if (sql.startsWith("UPDATE users SET role =")) {
+    const u = tables.users.find((x) => x.id === v[1]);
+    if (u) u.role = v[0];
+    return u ? [{ id: u.id, email: u.email, name: u.name, role: u.role }] : [];
+  }
 
   // -- decks ----------------------------------------------------------------
   if (sql.startsWith("SELECT d.id, d.title, d.source_type")) {

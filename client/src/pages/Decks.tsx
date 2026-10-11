@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { Link } from "react-router-dom";
-import { FileText, Link2, Plus, Type, Lightbulb, X } from "lucide-react";
+import { FileText, Link2, Plus, Type, Lightbulb, X, Search } from "lucide-react";
 import clsx from "clsx";
 import { api, ApiError, type Deck, type StudyPackResult } from "../lib/api";
 import { useLang } from "../lib/i18n";
@@ -230,10 +230,20 @@ export default function Decks() {
   const { t } = useLang();
   const queryClient = useQueryClient();
   const [modalOpen, setModalOpen] = useState(false);
+  const [search, setSearch] = useState("");
+  const [sort, setSort] = useState<"az" | "newest" | "most">("newest");
 
   const decksQ = useQuery({ queryKey: ["decks"], queryFn: () => api.get<Deck[]>("/decks") });
 
-  const decks = decksQ.data ?? [];
+  const allDecks = decksQ.data ?? [];
+  const q = search.trim().toLowerCase();
+  const decks = allDecks
+    .filter((d) => !q || d.title.toLowerCase().includes(q))
+    .sort((a, b) => {
+      if (sort === "az") return a.title.localeCompare(b.title);
+      if (sort === "most") return (b.cardCount ?? 0) - (a.cardCount ?? 0);
+      return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
+    });
 
   return (
     <div>
@@ -244,6 +254,32 @@ export default function Decks() {
           <Link to="/" className="btn-pink btn-sm" aria-label={t("nav.home")}>
             <X className="h-4 w-4" strokeWidth={3} />
           </Link>
+        </div>
+
+        <div className="mb-4 flex flex-col gap-2 sm:flex-row">
+          <div className="relative flex-1">
+            <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-ink/50" strokeWidth={2.75} />
+            <input
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              placeholder={t("decks.search")}
+              className="input !pl-10"
+              aria-label={t("decks.search")}
+            />
+          </div>
+          <label className="flex items-center gap-2">
+            <span className="font-display text-sm font-extrabold uppercase text-ink/60">{t("decks.sortLabel")}</span>
+            <select
+              value={sort}
+              onChange={(e) => setSort(e.target.value as "az" | "newest" | "most")}
+              className="input !w-auto cursor-pointer !py-2 font-display font-extrabold"
+              aria-label={t("decks.sortLabel")}
+            >
+              <option value="newest">{t("decks.sortNewest")}</option>
+              <option value="az">{t("decks.sortAZ")}</option>
+              <option value="most">{t("decks.sortMost")}</option>
+            </select>
+          </label>
         </div>
 
         {decksQ.isLoading ? (

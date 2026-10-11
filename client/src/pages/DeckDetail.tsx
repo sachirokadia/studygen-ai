@@ -1,11 +1,12 @@
 import { useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Link, useNavigate, useParams } from "react-router-dom";
-import { ArrowLeft, Play, Plus, Trash2 } from "lucide-react";
+import { ArrowLeft, Download, Play, Plus, Printer, Trash2 } from "lucide-react";
 import { api, type Deck, type Flashcard, type Quiz } from "../lib/api";
 import { useLang } from "../lib/i18n";
 import { Button, EmptyState, ErrorState, LoadingState, PageBg, PageHeader, Pill, TextInput, Field } from "../components/ui";
 import BookmarkToggle from "../components/BookmarkToggle";
+import { ClozeText, hasCloze, stripCloze } from "../lib/cloze";
 
 interface DeckDetailData {
   deck: Deck;
@@ -42,6 +43,8 @@ export default function DeckDetail() {
   const [front, setFront] = useState("");
   const [back, setBack] = useState("");
   const [cardError, setCardError] = useState(false);
+  const [ankiBusy, setAnkiBusy] = useState(false);
+  const [ankiMsg, setAnkiMsg] = useState<"done" | "error" | null>(null);
 
   const cardMut = useMutation({
     mutationFn: () => api.post<Flashcard>(`/flashcards`, { deckId: id, front: front.trim(), back: back.trim() }),
@@ -61,6 +64,21 @@ export default function DeckDetail() {
   if (!detailQ.data) return <EmptyState title={t("common.empty")} />;
 
   const { deck, flashcards, quizzes } = detailQ.data;
+
+  const handleAnki = async () => {
+    if (flashcards.length === 0 || ankiBusy) return;
+    setAnkiBusy(true);
+    setAnkiMsg(null);
+    try {
+      const { exportApkg } = await import("../lib/anki");
+      await exportApkg(deck.title, flashcards.map((c) => ({ front: c.front, back: c.back })));
+      setAnkiMsg("done");
+    } catch {
+      setAnkiMsg("error");
+    } finally {
+      setAnkiBusy(false);
+    }
+  };
 
   return (
     <div>
@@ -116,7 +134,26 @@ export default function DeckDetail() {
             <Plus className="h-4 w-4" strokeWidth={2.75} />
             {t("deck.addCard")}
           </Button>
+          <Button
+            variant="cream"
+            onClick={handleAnki}
+            disabled={ankiBusy || flashcards.length === 0}
+            className="btn-sm"
+          >
+            <Download className="h-4 w-4" strokeWidth={2.75} />
+            {ankiBusy ? t("common.loading") : t("deck.sendToAnki")}
+          </Button>
+          <Link to={`/decks/${deck.id}/print`} className="btn-cream btn-sm inline-flex items-center gap-1">
+            <Printer className="h-4 w-4" strokeWidth={2.75} />
+            {t("deck.print")}
+          </Link>
         </div>
+
+        {ankiMsg && (
+          <p className={`mb-4 text-center font-body text-sm font-bold ${ankiMsg === "done" ? "text-green-700" : "text-red-600"}`}>
+            {ankiMsg === "done" ? t("deck.ankiDone") : t("deck.ankiError")}
+          </p>
+        )}
 
         {showAddCard && (
           <div className="paper-card mb-8 !p-4">
@@ -174,8 +211,12 @@ export default function DeckDetail() {
                   key={c.id}
                   className={`paper-card !p-4 ${i % 2 === 0 ? "-rotate-1" : "rotate-1"}`}
                 >
-                  <p className="font-display text-xl font-extrabold leading-snug">{c.front}</p>
-                  <p className="mt-1 font-body text-sm font-semibold text-ink/70">{c.back}</p>
+                  <p className="font-display text-xl font-extrabold leading-snug">
+                    {hasCloze(c.front) ? <ClozeText text={c.front} revealed={false} /> : c.front}
+                  </p>
+                  <p className="mt-1 font-body text-sm font-semibold text-ink/70">
+                    {hasCloze(c.back) ? <ClozeText text={c.back} revealed={true} /> : stripCloze(c.back)}
+                  </p>
                 </div>
               ))}
             </div>

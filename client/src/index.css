@@ -220,3 +220,15 @@ body {
 .animate-bob {
   animation: creature-bob 3s ease-in-out infinite;
 }
+
+/* ---------- Print: clean Q/A sheet ---------- */
+@media print {
+  .no-print { display: none !important; }
+  body { background: #fff !important; }
+  .print-sheet { max-width: 100% !important; }
+  .print-card {
+    break-inside: avoid;
+    border-bottom: 2px dashed #2b2b2b33;
+    padding-bottom: 12px;
+  }
+}
