@@ -121,7 +121,9 @@ let sql = null;
 
 function getSql() {
   if (!process.env.DATABASE_URL) {
-    throw new HttpError(503, "Database not configured — set DATABASE_URL");
+    // Demo mode: in-memory fallback so the app works without a database.
+    // Data is per-instance and not persisted. Set DATABASE_URL for real storage.
+    return require("./memory-db").memoryDb;
   }
   if (!sql) {
     // Required lazily so a missing/broken driver never breaks non-DB routes.
@@ -136,9 +138,9 @@ function getSql() {
 // ---------------------------------------------------------------------------
 
 function jwtSecret() {
-  const s = process.env.JWT_SECRET;
-  if (!s) throw new HttpError(500, "JWT_SECRET is not set");
-  return s;
+  if (process.env.JWT_SECRET) return process.env.JWT_SECRET;
+  // Dev/demo fallback — tokens won't survive a secret change, fine for demo mode.
+  return "studygen-demo-secret-not-for-production";
 }
 
 function signToken(userId) {
@@ -1224,7 +1226,8 @@ async function route(req) {
 
   // Public
   if (method === "GET" && path === "/api/health") {
-    return { status: 200, body: { ok: true, service: "studygen-api" } };
+    const demo = require("./memory-db").isDemoMode();
+    return { status: 200, body: { ok: true, service: "studygen-api", demo } };
   }
   if (method === "POST" && path === "/api/auth/register") {
     return handleRegister(await readBody(req));

@@ -4,7 +4,7 @@ import { Link, useNavigate, useParams } from "react-router-dom";
 import { ArrowLeft, BookmarkPlus, Play, Plus, Trash2 } from "lucide-react";
 import { api, type Deck, type Flashcard, type Quiz } from "../lib/api";
 import { useLang } from "../lib/i18n";
-import { Button, Card, EmptyState, ErrorState, Field, LoadingState, Modal, PageHeader, TextInput } from "../components/ui";
+import { Button, EmptyState, ErrorState, Field, HangTag, LoadingState, Modal, PageBg, PageHeader, Pill, TextInput } from "../components/ui";
 
 interface DeckDetailData {
   deck: Deck;
@@ -55,84 +55,111 @@ export default function DeckDetail() {
 
   return (
     <div>
-      <button onClick={() => navigate("/decks")} className="mb-4 flex items-center gap-1 text-sm text-slate-500 hover:text-slate-800">
-        <ArrowLeft className="h-4 w-4" />
-        {t("btn.back")}
-      </button>
-      <PageHeader
-        title={deck.title}
-        action={
-          <div className="flex gap-2">
-            <Button variant="secondary" onClick={() => bookmarkMut.mutate()} disabled={bookmarkMut.isPending}>
-              <BookmarkPlus className="h-4 w-4" />
-            </Button>
-            <Button
-              variant="danger"
-              onClick={() => {
-                if (window.confirm(t("common.confirmDelete"))) deleteMut.mutate();
-              }}
-              disabled={deleteMut.isPending}
-            >
-              <Trash2 className="h-4 w-4" />
-              {t("btn.delete")}
-            </Button>
-          </div>
-        }
-      />
-
-      {deck.summary && (
-        <Card className="mb-6">
-          <h2 className="mb-2 font-semibold">{t("decks.summary")}</h2>
-          <p className="whitespace-pre-wrap text-sm text-slate-600">{deck.summary}</p>
-        </Card>
-      )}
-
-      <div className="grid gap-6 lg:grid-cols-2">
-        <div>
-          <h2 className="mb-3 font-semibold">
-            {t("decks.flashcards")} ({flashcards.length})
-          </h2>
-          {flashcards.length === 0 ? (
-            <EmptyState title={t("common.empty")} />
-          ) : (
-            <div className="space-y-2">
-              {flashcards.map((c) => (
-                <Card key={c.id} className="!p-4">
-                  <p className="text-sm font-medium">{c.front}</p>
-                  <p className="mt-1 text-sm text-slate-500">{c.back}</p>
-                </Card>
-              ))}
+      <PageBg variant="sky" />
+      <div className="paper-card washi relative mx-auto max-w-3xl p-6">
+        <PageHeader
+          title={deck.title}
+          action={
+            <div className="flex gap-2">
+              <Button variant="secondary" onClick={() => bookmarkMut.mutate()} disabled={bookmarkMut.isPending}>
+                <BookmarkPlus className="h-4 w-4" strokeWidth={2.75} />
+              </Button>
+              <Button
+                variant="danger"
+                onClick={() => {
+                  if (window.confirm(t("common.confirmDelete"))) deleteMut.mutate();
+                }}
+                disabled={deleteMut.isPending}
+              >
+                <Trash2 className="h-4 w-4" strokeWidth={2.75} />
+                {t("btn.delete")}
+              </Button>
             </div>
-          )}
+          }
+        />
+
+        {deck.summary && (
+          <div className="mb-5">
+            <h2 className="mb-2 font-display text-2xl font-extrabold uppercase">{t("decks.summary")}</h2>
+            <p className="whitespace-pre-wrap font-body text-sm font-semibold text-ink/70">{deck.summary}</p>
+          </div>
+        )}
+
+        <div className="mb-5 flex flex-wrap gap-2">
+          <Pill>
+            {deck.cardCount} {t("decks.cards")}
+          </Pill>
+          <Pill color="bg-btnblue">
+            {deck.quizCount} {t("decks.quizzes")}
+          </Pill>
+          <Pill color="bg-btnpink">
+            {flashcards.length} {t("decks.flashcards")}
+          </Pill>
         </div>
 
-        <div>
-          <div className="mb-3 flex items-center justify-between">
-            <h2 className="font-semibold">
-              {t("decks.quizzesList")} ({quizzes.length})
+        <div className="mb-8 flex flex-wrap items-center gap-3">
+          <Link to="/review" className="btn-blue">
+            <Play className="h-4 w-4" strokeWidth={2.75} />
+            {t("dash.startReview")}
+          </Link>
+          <button onClick={() => navigate("/decks")} className="btn-yellow btn-sm">
+            <ArrowLeft className="h-4 w-4" strokeWidth={2.75} />
+            {t("btn.back")}
+          </button>
+        </div>
+
+        <div className="grid gap-6 lg:grid-cols-2">
+          <div>
+            <h2 className="mb-3 font-display text-2xl font-extrabold uppercase">
+              {t("decks.flashcards")} ({flashcards.length})
             </h2>
-            <Button variant="secondary" onClick={() => setQuizModal(true)}>
-              <Plus className="h-4 w-4" />
-              {t("decks.newQuiz")}
-            </Button>
-          </div>
-          {quizzes.length === 0 ? (
-            <EmptyState title={t("common.empty")} />
-          ) : (
-            <div className="space-y-2">
-              {quizzes.map((q) => (
-                <Card key={q.id} className="!p-4">
-                  <div className="flex items-center justify-between">
-                    <p className="font-medium">{q.title}</p>
-                    <Link to={`/quiz/${q.id}`} className="btn-primary !px-3 !py-1.5 text-xs">
-                      <Play className="h-3.5 w-3.5" />
-                      {t("decks.takeQuiz")}
-                    </Link>
+            {flashcards.length === 0 ? (
+              <EmptyState title={t("common.empty")} />
+            ) : (
+              <div className="space-y-3">
+                {flashcards.map((c, i) => (
+                  <div
+                    key={c.id}
+                    className={`paper-card !p-4 ${i % 2 === 0 ? "-rotate-1" : "rotate-1"}`}
+                  >
+                    <p className="font-display text-xl font-extrabold leading-snug">{c.front}</p>
+                    <p className="mt-1 font-body text-sm font-semibold text-ink/70">{c.back}</p>
                   </div>
-                </Card>
-              ))}
+                ))}
+              </div>
+            )}
+          </div>
+
+          <div>
+            <div className="mb-3 flex items-center justify-between">
+              <h2 className="font-display text-2xl font-extrabold uppercase">
+                {t("decks.quizzesList")} ({quizzes.length})
+              </h2>
+              <Button variant="secondary" onClick={() => setQuizModal(true)} className="btn-sm">
+                <Plus className="h-4 w-4" strokeWidth={2.75} />
+                {t("decks.newQuiz")}
+              </Button>
             </div>
-          )}
+            {quizzes.length === 0 ? (
+              <EmptyState title={t("common.empty")} />
+            ) : (
+              <div className="space-y-3">
+                {quizzes.map((q) => (
+                  <div key={q.id} className="paper-card !p-4">
+                    <div className="flex items-center justify-between gap-2">
+                      <HangTag color="bg-machinepurple" className="!text-base">
+                        {q.title}
+                      </HangTag>
+                      <Link to={`/quiz/${q.id}`} className="btn-blue btn-sm">
+                        <Play className="h-3.5 w-3.5" strokeWidth={2.75} />
+                        {t("decks.takeQuiz")}
+                      </Link>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
         </div>
       </div>
 
@@ -144,7 +171,7 @@ export default function DeckDetail() {
           <Button onClick={() => quizMut.mutate()} disabled={quizMut.isPending} className="mt-4 w-full">
             {quizMut.isPending ? t("common.loading") : t("btn.create")}
           </Button>
-          {quizMut.isError && <p className="mt-2 text-sm text-red-600">{t("common.error")}</p>}
+          {quizMut.isError && <p className="mt-2 font-body text-sm font-bold text-red-600">{t("common.error")}</p>}
         </Modal>
       )}
     </div>

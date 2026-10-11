@@ -4,7 +4,9 @@ import { Link } from "react-router-dom";
 import { Layers, Plus, RotateCcw, Sparkles, StickyNote, Timer, Zap } from "lucide-react";
 import { api, type HeatmapDay, type TodayStats } from "../lib/api";
 import { useLang } from "../lib/i18n";
-import { Button, Card, EmptyState, ErrorState, LoadingState, PageHeader, TextInput } from "../components/ui";
+import { Button, Card, EmptyState, ErrorState, HangTag, LoadingState, PageBg, PageHeader, Pill, TextInput } from "../components/ui";
+import { GreyBlob, OrangeBlob, YellowChick, SpottedDog } from "../components/creatures";
+import DemoBanner from "../components/DemoBanner";
 
 function Heatmap({ days }: { days: HeatmapDay[] }) {
   // Build a 16-week (112-day) grid ending today.
@@ -26,8 +28,9 @@ function Heatmap({ days }: { days: HeatmapDay[] }) {
   const weeks: ({ date: string; count: number } | null)[][] = [];
   for (let i = 0; i < padded.length; i += 7) weeks.push(padded.slice(i, i + 7));
 
+  // Garden-plot shades: empty soil -> sprouting -> growing -> full bloom.
   const color = (c: number) =>
-    c === 0 ? "bg-slate-100" : c < 3 ? "bg-indigo-200" : c < 6 ? "bg-indigo-400" : "bg-indigo-600";
+    c === 0 ? "bg-paperdark" : c < 3 ? "bg-grass/30" : c < 6 ? "bg-grass/60" : "bg-grassdark";
 
   return (
     <div className="flex gap-1 overflow-x-auto">
@@ -38,10 +41,10 @@ function Heatmap({ days }: { days: HeatmapDay[] }) {
               <div
                 key={di}
                 title={`${cell.date}: ${cell.count}`}
-                className={`h-3.5 w-3.5 rounded-sm ${color(cell.count)}`}
+                className={`h-4 w-4 rounded border-2 border-ink/25 ${color(cell.count)}`}
               />
             ) : (
-              <div key={di} className="h-3.5 w-3.5" />
+              <div key={di} className="h-4 w-4" />
             ),
           )}
         </div>
@@ -70,11 +73,13 @@ export default function Dashboard() {
 
   return (
     <div>
+      <PageBg variant="sky" />
+      <DemoBanner />
       <PageHeader
-        title={t("dash.title")}
+        title="MY YARD"
         action={
-          <Link to="/decks" className="btn-primary">
-            <Plus className="h-4 w-4" />
+          <Link to="/decks" className="btn-yellow btn-sm">
+            <Plus className="h-4 w-4" strokeWidth={2.75} />
             {t("dash.newDeck")}
           </Link>
         }
@@ -86,48 +91,75 @@ export default function Dashboard() {
         <ErrorState message={t("common.error")} onRetry={() => todayQ.refetch()} retryLabel={t("common.retry")} />
       ) : (
         stats && (
-          <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">
-            <Card>
-              <div className="flex items-center gap-2 text-sm text-slate-500">
-                <RotateCcw className="h-4 w-4" />
-                {t("dash.due")}
-              </div>
-              <p className="mt-1 text-3xl font-bold">{stats.dueCount}</p>
-              <Link to="/review" className="mt-2 inline-block text-sm font-medium text-indigo-600 hover:underline">
-                {t("dash.startReview")} →
-              </Link>
-            </Card>
-            <Card>
-              <div className="flex items-center gap-2 text-sm text-slate-500">
-                <Layers className="h-4 w-4" />
-                {t("dash.decks")}
-              </div>
-              <p className="mt-1 text-3xl font-bold">{stats.decksCount}</p>
-            </Card>
-            <Card>
-              <div className="flex items-center gap-2 text-sm text-slate-500">
-                <Timer className="h-4 w-4" />
-                {t("dash.focus")}
-              </div>
-              <p className="mt-1 text-3xl font-bold">
-                {stats.focusMinutesToday}
-                <span className="ml-1 text-base font-medium text-slate-400">{t("dash.min")}</span>
-              </p>
-            </Card>
-            <Card>
-              <div className="flex items-center gap-2 text-sm text-slate-500">
-                <Zap className="h-4 w-4" />
-                {t("dash.xp")}
-              </div>
-              <p className="mt-1 text-3xl font-bold">{stats.xpToday}</p>
-            </Card>
-          </div>
+          <>
+            <div className="mb-4 flex flex-wrap items-center gap-2">
+              <Pill>
+                {stats.decksCount} {t("dash.decks")}
+              </Pill>
+              <Pill color="bg-btnblue">
+                {stats.dueCount} {t("dash.due")}
+              </Pill>
+            </div>
+
+            <div className="mb-6 flex items-end justify-center gap-4 md:gap-8">
+              <GreyBlob size={72} className="animate-bob" />
+              <OrangeBlob size={88} className="animate-bob" />
+              <YellowChick size={80} className="animate-bob" />
+              <SpottedDog size={96} className="animate-bob" />
+            </div>
+
+            <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">
+              <Card alt>
+                <HangTag color="bg-btnpink" className="!text-base">
+                  <RotateCcw className="h-4 w-4" strokeWidth={2.75} />
+                  {t("dash.due")}
+                </HangTag>
+                <p className="mt-3 font-display text-5xl font-extrabold">{stats.dueCount}</p>
+                <Link to="/review" className="btn-blue btn-sm mt-3">
+                  {t("dash.startReview")} →
+                </Link>
+              </Card>
+              <Card>
+                <HangTag color="bg-btnblue" className="!text-base">
+                  <Layers className="h-4 w-4" strokeWidth={2.75} />
+                  {t("dash.decks")}
+                </HangTag>
+                <p className="mt-3 font-display text-5xl font-extrabold">{stats.decksCount}</p>
+                <Link to="/decks" className="btn-yellow btn-sm mt-3">
+                  {t("nav.yard")} →
+                </Link>
+              </Card>
+              <Card alt>
+                <HangTag color="bg-machinepurple" className="!text-base">
+                  <Timer className="h-4 w-4" strokeWidth={2.75} />
+                  {t("dash.focus")}
+                </HangTag>
+                <p className="mt-3 font-display text-5xl font-extrabold">
+                  {stats.focusMinutesToday}
+                  <span className="ml-1 font-body text-base font-bold text-ink/50">{t("dash.min")}</span>
+                </p>
+                <a href="#focus-logger" className="btn-green btn-sm mt-3">
+                  {t("dash.logFocus")} →
+                </a>
+              </Card>
+              <Card>
+                <HangTag color="bg-btnyellow" className="!text-base">
+                  <Zap className="h-4 w-4" strokeWidth={2.75} />
+                  {t("dash.xp")}
+                </HangTag>
+                <p className="mt-3 font-display text-5xl font-extrabold">{stats.xpToday}</p>
+                <Link to="/paths" className="btn-pink btn-sm mt-3">
+                  {t("nav.paths")} →
+                </Link>
+              </Card>
+            </div>
+          </>
         )
       )}
 
       <div className="mt-6 grid gap-4 lg:grid-cols-2">
         <Card>
-          <h2 className="mb-3 font-semibold">{t("dash.heatmap")}</h2>
+          <h2 className="mb-3 font-display text-2xl font-extrabold uppercase">{t("dash.heatmap")}</h2>
           {heatQ.isLoading ? (
             <LoadingState />
           ) : heatQ.isError ? (
@@ -139,28 +171,28 @@ export default function Dashboard() {
           )}
         </Card>
 
-        <Card>
-          <h2 className="mb-3 font-semibold">{t("dash.quick")}</h2>
+        <Card className="washi relative">
+          <h2 className="mb-3 font-display text-2xl font-extrabold uppercase">{t("dash.quick")}</h2>
           <div className="grid grid-cols-2 gap-3">
-            <Link to="/review" className="btn-secondary">
-              <RotateCcw className="h-4 w-4" />
+            <Link to="/review" className="btn-green">
+              <RotateCcw className="h-4 w-4" strokeWidth={2.75} />
               {t("dash.startReview")}
             </Link>
-            <Link to="/explain" className="btn-secondary">
-              <Sparkles className="h-4 w-4" />
+            <Link to="/explain" className="btn-blue">
+              <Sparkles className="h-4 w-4" strokeWidth={2.75} />
               {t("nav.explain")}
             </Link>
-            <Link to="/notes" className="btn-secondary">
-              <StickyNote className="h-4 w-4" />
+            <Link to="/notes" className="btn-yellow">
+              <StickyNote className="h-4 w-4" strokeWidth={2.75} />
               {t("nav.notes")}
             </Link>
-            <Link to="/chat" className="btn-secondary">
-              <Zap className="h-4 w-4" />
+            <Link to="/chat" className="btn-pink">
+              <Zap className="h-4 w-4" strokeWidth={2.75} />
               {t("nav.chat")}
             </Link>
           </div>
-          <div className="mt-4 border-t border-slate-100 pt-4">
-            <p className="mb-2 text-sm font-medium">{t("dash.logFocus")}</p>
+          <div id="focus-logger" className="mt-4 border-t-[3px] border-dashed border-ink/20 pt-4">
+            <p className="mb-2 font-display text-xl font-extrabold uppercase">{t("dash.logFocus")}</p>
             <div className="flex gap-2">
               <TextInput
                 type="number"
@@ -172,7 +204,7 @@ export default function Dashboard() {
                 placeholder={t("dash.minutes")}
               />
               <Button
-                variant="secondary"
+                variant="cream"
                 disabled={focusMut.isPending}
                 onClick={() => {
                   const m = parseInt(minutes, 10);
@@ -182,7 +214,7 @@ export default function Dashboard() {
                 {focusMut.isPending ? t("common.loading") : t("btn.save")}
               </Button>
             </div>
-            {focusMut.isSuccess && <p className="mt-2 text-sm text-green-600">+{focusMut.data.xp} XP</p>}
+            {focusMut.isSuccess && <p className="mt-2 font-display text-2xl font-extrabold text-grassdark">+{focusMut.data.xp} XP</p>}
           </div>
         </Card>
       </div>

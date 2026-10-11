@@ -1,41 +1,70 @@
 import { useState, type ReactNode } from "react";
 import { NavLink, useNavigate } from "react-router-dom";
+import { useQuery } from "@tanstack/react-query";
 import {
-  LayoutDashboard,
+  BookOpen,
+  Calendar,
+  Coins,
+  Fence,
+  Hand,
   Layers,
-  RotateCcw,
-  StickyNote,
-  Map,
-  Sparkles,
-  MessageCircle,
-  Bookmark,
-  ShieldCheck,
   LogOut,
-  Menu,
-  X,
-  Languages,
-  GraduationCap,
+  Map,
+  MessageCircle,
+  Settings,
+  ShieldCheck,
+  Sparkles,
+  StickyNote,
+  Bookmark,
 } from "lucide-react";
 import clsx from "clsx";
 import { useAuth } from "../lib/auth";
 import { useLang, type I18nKey } from "../lib/i18n";
+import { api, type TodayStats } from "../lib/api";
+import { HangCircle } from "./ui";
 
-const NAV: { to: string; key: I18nKey; icon: typeof LayoutDashboard }[] = [
-  { to: "/", key: "nav.dashboard", icon: LayoutDashboard },
-  { to: "/decks", key: "nav.decks", icon: Layers },
-  { to: "/review", key: "nav.review", icon: RotateCcw },
+function TodayTag() {
+  const now = new Date();
+  const month = now.toLocaleString("en-US", { month: "short" }).toUpperCase();
+  return (
+    <span className="date-tag">
+      <span>{month}</span>
+      <span className="text-lg leading-none">{now.getDate()}</span>
+    </span>
+  );
+}
+
+function Wallet() {
+  const { data } = useQuery({ queryKey: ["today"], queryFn: () => api.get<TodayStats>("/study/today") });
+  return (
+    <span className="wallet" title="XP today">
+      <Coins className="h-4 w-4" strokeWidth={2.75} />
+      {data?.xpToday ?? 0}
+    </span>
+  );
+}
+
+const CHAIN_NAV = [
+  { to: "/", label: "Today", icon: Calendar, color: "bg-grass" },
+  { to: "/decks", label: "Yard", icon: Fence, color: "bg-sky" },
+  { to: "/review", label: "Cards", icon: Layers, color: "bg-btnyellow" },
+  { to: "/notes", label: "Notes", icon: StickyNote, color: "bg-btnpink" },
+  { to: "/paths", label: "Paths", icon: Map, color: "bg-machinepurple" },
+];
+
+const BOTTOM_NAV: { to: string; key: I18nKey; icon: typeof Calendar }[] = [
+  { to: "/", key: "nav.today", icon: Calendar },
+  { to: "/decks", key: "nav.yard", icon: Fence },
+  { to: "/review", key: "nav.cards", icon: Layers },
   { to: "/notes", key: "nav.notes", icon: StickyNote },
   { to: "/paths", key: "nav.paths", icon: Map },
   { to: "/explain", key: "nav.explain", icon: Sparkles },
   { to: "/chat", key: "nav.chat", icon: MessageCircle },
-  { to: "/bookmarks", key: "nav.bookmarks", icon: Bookmark },
 ];
-
-const MOBILE_NAV = NAV.slice(0, 5);
 
 export default function Layout({ children }: { children: ReactNode }) {
   const { user, logout } = useAuth();
-  const { t, lang, setLang } = useLang();
+  const { t } = useLang();
   const navigate = useNavigate();
   const [menuOpen, setMenuOpen] = useState(false);
 
@@ -44,115 +73,97 @@ export default function Layout({ children }: { children: ReactNode }) {
     navigate("/login");
   };
 
-  const linkCls = ({ isActive }: { isActive: boolean }) =>
-    clsx(
-      "flex items-center gap-2.5 rounded-xl px-3.5 py-2.5 text-sm font-medium transition",
-      isActive ? "bg-indigo-50 text-indigo-700" : "text-slate-600 hover:bg-slate-100",
-    );
-
   return (
-    <div className="min-h-screen pb-20 md:pb-0">
-      <header className="sticky top-0 z-40 border-b border-slate-200 bg-white/90 backdrop-blur">
-        <div className="mx-auto flex h-16 max-w-6xl items-center justify-between gap-3 px-4">
-          <button onClick={() => navigate("/")} className="flex items-center gap-2">
-            <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-gradient-to-br from-indigo-600 to-violet-600 text-white">
-              <GraduationCap className="h-5 w-5" />
-            </span>
-            <span className="hidden text-lg font-bold tracking-tight sm:block">StudyGen AI</span>
+    <div className="min-h-screen pb-28 md:pb-10">
+      {/* ===== Top bar: date tag | wallet | gear | book | pink hand ===== */}
+      <header className="mx-auto max-w-6xl px-4 pt-4">
+        <div className="flex items-center gap-2.5">
+          <TodayTag />
+          <Wallet />
+          <div className="flex-1" />
+          <button className="icon-round" onClick={() => setMenuOpen((o) => !o)} aria-label="Settings" title="Menu">
+            <Settings className="h-5 w-5" strokeWidth={2.75} />
           </button>
-
-          <nav className="hidden items-center gap-1 lg:flex">
-            {NAV.map((item) => (
-              <NavLink key={item.to} to={item.to} end={item.to === "/"} className={linkCls}>
-                <item.icon className="h-4 w-4" />
-                {t(item.key)}
-              </NavLink>
-            ))}
-            {user?.role === "admin" && (
-              <NavLink to="/admin" className={linkCls}>
-                <ShieldCheck className="h-4 w-4" />
-                {t("nav.admin")}
-              </NavLink>
-            )}
-          </nav>
-
-          <div className="flex items-center gap-2">
-            <button
-              onClick={() => setLang(lang === "en" ? "hi" : "en")}
-              className="btn-secondary !px-3 !py-2 text-xs"
-              title="Toggle language"
-            >
-              <Languages className="h-4 w-4" />
-              {lang === "en" ? "हिं" : "EN"}
-            </button>
-            <div className="relative">
-              <button
-                onClick={() => setMenuOpen((o) => !o)}
-                className="flex h-9 w-9 items-center justify-center rounded-full bg-indigo-100 text-sm font-bold text-indigo-700"
-                aria-label="User menu"
-              >
-                {(user?.name ?? "U").charAt(0).toUpperCase()}
-              </button>
-              {menuOpen && (
-                <div className="absolute right-0 mt-2 w-48 rounded-xl border border-slate-200 bg-white py-1 shadow-lg">
-                  <div className="px-4 py-2 text-sm font-medium text-slate-800">{user?.name}</div>
-                  <div className="px-4 pb-2 text-xs text-slate-500">{user?.email}</div>
-                  <button
-                    onClick={handleLogout}
-                    className="flex w-full items-center gap-2 px-4 py-2 text-left text-sm text-red-600 hover:bg-red-50"
-                  >
-                    <LogOut className="h-4 w-4" />
-                    {t("btn.logout")}
-                  </button>
-                </div>
-              )}
-            </div>
-            <button className="rounded-xl p-2 hover:bg-slate-100 lg:hidden" onClick={() => setMenuOpen((o) => !o)} aria-label="Menu">
-              {menuOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
-            </button>
-          </div>
+          <NavLink to="/notes" className="icon-round" aria-label="Notes" title={t("nav.notes")}>
+            <BookOpen className="h-5 w-5" strokeWidth={2.75} />
+          </NavLink>
+          <NavLink to="/chat" aria-label="Chat" title={t("nav.chat")}
+            className="flex h-10 w-10 items-center justify-center rounded-full border-[2.5px] border-ink bg-handpink"
+            style={{ boxShadow: "2px 2px 0 #2B2B2B" }}>
+            <Hand className="h-5 w-5" strokeWidth={2.75} />
+          </NavLink>
         </div>
 
-        {/* Tablet/mobile dropdown nav */}
-        {menuOpen && (
-          <nav className="border-t border-slate-100 px-4 py-2 lg:hidden">
-            {NAV.map((item) => (
-              <NavLink key={item.to} to={item.to} end={item.to === "/"} className={linkCls} onClick={() => setMenuOpen(false)}>
-                <item.icon className="h-4 w-4" />
-                {t(item.key)}
+        {/* ===== Metal chain with 5 circular hanging tags ===== */}
+        <div className="relative mt-4">
+          <div className="chain-metal" aria-hidden="true" />
+          <nav className="flex items-start justify-center gap-3 px-4 md:gap-5" aria-label="Sections">
+            {CHAIN_NAV.map((item) => (
+              <NavLink
+                key={item.to}
+                to={item.to}
+                end={item.to === "/"}
+                title={item.label}
+                className={({ isActive }) => clsx("-mt-2", isActive && "relative")}
+              >
+                {({ isActive }) => (
+                  <HangCircle color={item.color} active={isActive}>
+                    <item.icon className="h-5 w-5" strokeWidth={2.75} />
+                  </HangCircle>
+                )}
               </NavLink>
             ))}
-            {user?.role === "admin" && (
-              <NavLink to="/admin" className={linkCls} onClick={() => setMenuOpen(false)}>
-                <ShieldCheck className="h-4 w-4" />
-                {t("nav.admin")}
-              </NavLink>
-            )}
           </nav>
+        </div>
+
+        {/* User dropdown */}
+        {menuOpen && (
+          <div className="paper-card relative z-50 mx-auto mt-3 max-w-xs p-4">
+            <div className="font-display text-xl font-extrabold uppercase">{user?.name}</div>
+            <div className="font-body text-xs font-bold text-ink/60">{user?.email}</div>
+            <div className="mt-3 flex flex-col gap-2">
+              <NavLink to="/bookmarks" className="btn-cream btn-sm w-full" onClick={() => setMenuOpen(false)}>
+                <Bookmark className="h-4 w-4" strokeWidth={2.75} />
+                {t("nav.bookmarks")}
+              </NavLink>
+              {user?.role === "admin" && (
+                <NavLink to="/admin" className="btn-cream btn-sm w-full" onClick={() => setMenuOpen(false)}>
+                  <ShieldCheck className="h-4 w-4" strokeWidth={2.75} />
+                  {t("nav.admin")}
+                </NavLink>
+              )}
+              <button onClick={handleLogout} className="btn-pink btn-sm w-full">
+                <LogOut className="h-4 w-4" strokeWidth={2.75} />
+                {t("btn.logout")}
+              </button>
+            </div>
+          </div>
         )}
       </header>
 
       <main className="mx-auto max-w-6xl px-4 py-6">{children}</main>
 
-      {/* Mobile bottom nav */}
-      <nav className="fixed inset-x-0 bottom-0 z-40 border-t border-slate-200 bg-white/95 backdrop-blur md:hidden">
-        <div className="grid grid-cols-5">
-          {MOBILE_NAV.map((item) => (
+      {/* ===== Bottom nav: paper tags ===== */}
+      <nav
+        className="fixed inset-x-0 bottom-0 z-40 border-t-[3px] border-ink bg-paper/95 px-3 pb-3 pt-2 backdrop-blur md:static md:mx-auto md:mt-8 md:max-w-6xl md:border-[3px] md:bg-transparent md:px-4 md:backdrop-blur-none"
+        aria-label="Main"
+      >
+        <div className="grid grid-cols-4 gap-2 md:flex md:flex-wrap md:justify-center md:gap-3">
+          {BOTTOM_NAV.map((item) => (
             <NavLink
               key={item.to}
               to={item.to}
               end={item.to === "/"}
-              className={({ isActive }) =>
-                clsx(
-                  "flex flex-col items-center gap-1 py-2.5 text-[10px] font-medium",
-                  isActive ? "text-indigo-700" : "text-slate-500",
-                )
-              }
+              className={({ isActive }) => clsx("nav-tag", isActive && "nav-tag-active")}
             >
-              <item.icon className="h-5 w-5" />
+              <item.icon className="h-5 w-5" strokeWidth={2.75} />
               {t(item.key)}
             </NavLink>
           ))}
+          <button className="nav-tag" onClick={() => setMenuOpen((o) => !o)}>
+            <Settings className="h-5 w-5" strokeWidth={2.75} />
+            {t("nav.me")}
+          </button>
         </div>
       </nav>
     </div>

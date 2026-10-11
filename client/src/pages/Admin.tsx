@@ -3,7 +3,7 @@ import { Layers, StickyNote, Users } from "lucide-react";
 import { api, type AdminStats } from "../lib/api";
 import { useAuth } from "../lib/auth";
 import { useLang } from "../lib/i18n";
-import { Card, EmptyState, ErrorState, LoadingState, PageHeader } from "../components/ui";
+import { EmptyState, ErrorState, LoadingState, PageBg, Pill } from "../components/ui";
 
 export default function Admin() {
   const { t } = useLang();
@@ -18,46 +18,43 @@ export default function Admin() {
   if (user?.role !== "admin") {
     return (
       <div>
-        <PageHeader title={t("admin.title")} />
-        <EmptyState title={t("admin.forbidden")} />
+        <PageBg variant="night" />
+        <div className="board-cream mx-auto max-w-5xl p-4 md:p-6">
+          <h1 className="title-chunky">{t("admin.title")}</h1>
+          <EmptyState title={t("admin.forbidden")} creature="grey" />
+        </div>
       </div>
     );
   }
 
   return (
     <div>
-      <PageHeader title={t("admin.title")} />
-      {statsQ.isLoading ? (
-        <LoadingState label={t("common.loading")} />
-      ) : statsQ.isError ? (
-        <ErrorState message={t("common.error")} onRetry={() => statsQ.refetch()} retryLabel={t("common.retry")} />
-      ) : statsQ.data ? (
-        <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
-          <Card>
-            <div className="flex items-center gap-2 text-sm text-slate-500">
-              <Users className="h-4 w-4" />
-              {t("admin.users")}
-            </div>
-            <p className="mt-1 text-3xl font-bold">{statsQ.data.users}</p>
-          </Card>
-          <Card>
-            <div className="flex items-center gap-2 text-sm text-slate-500">
-              <Layers className="h-4 w-4" />
-              {t("admin.decksCount")}
-            </div>
-            <p className="mt-1 text-3xl font-bold">{statsQ.data.decks}</p>
-          </Card>
-          <Card>
-            <div className="flex items-center gap-2 text-sm text-slate-500">
-              <StickyNote className="h-4 w-4" />
-              {t("admin.cardsCount")}
-            </div>
-            <p className="mt-1 text-3xl font-bold">{statsQ.data.cards}</p>
-          </Card>
-        </div>
-      ) : (
-        <EmptyState title={t("common.empty")} />
-      )}
+      <PageBg variant="night" />
+      <div className="board-cream mx-auto max-w-5xl p-4 md:p-6">
+        <h1 className="title-chunky mb-6">{t("admin.title")}</h1>
+        {statsQ.isLoading ? (
+          <LoadingState label={t("common.loading")} />
+        ) : statsQ.isError ? (
+          <ErrorState message={t("common.error")} onRetry={() => statsQ.refetch()} retryLabel={t("common.retry")} />
+        ) : statsQ.data ? (
+          <div className="flex flex-wrap gap-3">
+            <Pill color="bg-btnyellow" className="!py-1.5 !text-lg">
+              <Users className="h-5 w-5" strokeWidth={2.75} />
+              {t("admin.users")}: {statsQ.data.users}
+            </Pill>
+            <Pill color="bg-sky" className="!py-1.5 !text-lg">
+              <Layers className="h-5 w-5" strokeWidth={2.75} />
+              {t("admin.decksCount")}: {statsQ.data.decks}
+            </Pill>
+            <Pill color="bg-btnpink" className="!py-1.5 !text-lg">
+              <StickyNote className="h-5 w-5" strokeWidth={2.75} />
+              {t("admin.cardsCount")}: {statsQ.data.cards}
+            </Pill>
+          </div>
+        ) : (
+          <EmptyState title={t("common.empty")} />
+        )}
+      </div>
     </div>
   );
 }

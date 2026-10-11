@@ -1,10 +1,11 @@
 import { Link, useParams } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
-import { ArrowLeft, CheckCircle2, XCircle } from "lucide-react";
+import { ArrowLeft } from "lucide-react";
 import clsx from "clsx";
 import { api, type Quiz, type QuizAttempt } from "../lib/api";
 import { useLang } from "../lib/i18n";
-import { Button, Card, EmptyState, ErrorState, LoadingState, PageHeader } from "../components/ui";
+import { Button, EmptyState, ErrorState, LoadingState, PageBg, PageHeader, Sticker } from "../components/ui";
+import Creature from "../components/creatures";
 
 export default function QuizReview() {
   const { id } = useParams<{ id: string }>();
@@ -39,49 +40,51 @@ export default function QuizReview() {
 
   return (
     <div className="mx-auto max-w-3xl">
-      <Link to={`/decks/${quiz.deckId}`} className="mb-4 flex items-center gap-1 text-sm text-slate-500 hover:text-slate-800">
-        <ArrowLeft className="h-4 w-4" />
+      <PageBg variant="night" />
+      <Link to={`/decks/${quiz.deckId}`} className="mb-4 inline-flex items-center gap-1 font-display text-xl font-extrabold text-paper/70 hover:text-paper">
+        <ArrowLeft className="h-4 w-4" strokeWidth={2.75} />
         {t("btn.back")}
       </Link>
-      <PageHeader title={quiz.title} />
+      <PageHeader title={quiz.title} light />
 
-      <Card className="mb-6 text-center">
-        <p className="text-sm text-slate-500">{t("quiz.score")}</p>
-        <p className="mt-1 text-4xl font-bold">
+      <div className="paper-card washi relative mb-6 p-6 text-center">
+        <Creature kind={pct >= 70 ? "dog" : "grey"} size={104} className="mx-auto animate-bob" />
+        <p className="mt-2 font-display text-2xl font-extrabold text-ink/60">{t("quiz.score")}</p>
+        <p className="mt-1 font-display text-6xl font-extrabold">
           {attempt.score}
-          <span className="text-xl text-slate-400">/{attempt.total}</span>
+          <span className="text-3xl text-ink/40">/{attempt.total}</span>
         </p>
-        <p className={clsx("mt-1 text-sm font-semibold", pct >= 70 ? "text-green-600" : pct >= 40 ? "text-amber-600" : "text-red-600")}>
+        <p className={clsx("mt-1 font-display text-3xl font-extrabold", pct >= 70 ? "text-grassdark" : pct >= 40 ? "text-ink/60" : "text-red-600")}>
           {pct}%
         </p>
-      </Card>
+      </div>
 
-      <h2 className="mb-3 font-semibold">{t("quiz.reviewAnswers")}</h2>
+      <h2 className="mb-3 font-display text-2xl font-extrabold uppercase text-paper">{t("quiz.reviewAnswers")}</h2>
       <div className="space-y-4">
         {(quiz.questions ?? []).map((q, qi) => {
           const selected = answerByQ.get(q.id) ?? -1;
           const correct = selected === q.correctIndex;
           return (
-            <Card key={q.id}>
-              <div className="flex items-start gap-2">
-                {correct ? (
-                  <CheckCircle2 className="mt-0.5 h-5 w-5 shrink-0 text-green-500" />
-                ) : (
-                  <XCircle className="mt-0.5 h-5 w-5 shrink-0 text-red-500" />
-                )}
-                <p className="font-medium">
+            <div key={q.id} className="paper-card !p-5">
+              <div className="flex items-start justify-between gap-3">
+                <p className="font-display text-2xl font-extrabold leading-snug">
                   {qi + 1}. {q.question}
                 </p>
+                {correct ? (
+                  <Sticker color="bg-grass" className="shrink-0">✓ {t("quiz.correct")}</Sticker>
+                ) : (
+                  <Sticker color="bg-btnpink" className="shrink-0">✗ {t("quiz.wrong")}</Sticker>
+                )}
               </div>
               <div className="mt-3 space-y-2">
                 {q.options.map((opt, oi) => (
                   <div
                     key={oi}
                     className={clsx(
-                      "rounded-xl border px-4 py-2.5 text-sm",
-                      oi === q.correctIndex && "border-green-300 bg-green-50 font-medium text-green-800",
-                      oi === selected && oi !== q.correctIndex && "border-red-300 bg-red-50 text-red-700",
-                      oi !== selected && oi !== q.correctIndex && "border-slate-200 text-slate-500",
+                      "rounded-xl border-[3px] px-4 py-2.5 font-body text-sm font-semibold",
+                      oi === q.correctIndex && "border-grassdark bg-grass/25 font-bold text-ink",
+                      oi === selected && oi !== q.correctIndex && "border-btnpink bg-btnpink/30 font-bold text-ink",
+                      oi !== selected && oi !== q.correctIndex && "border-ink/20 text-ink/50",
                     )}
                   >
                     {opt}
@@ -91,12 +94,12 @@ export default function QuizReview() {
                 ))}
               </div>
               {q.explanation && (
-                <p className="mt-3 rounded-xl bg-slate-50 p-3 text-sm text-slate-600">
-                  <span className="font-medium">{t("quiz.explanation")}: </span>
+                <p className="mt-3 rounded-xl border-[3px] border-ink/20 bg-paperdark p-3 font-body text-sm font-semibold text-ink/70">
+                  <span className="font-bold text-ink">{t("quiz.explanation")}: </span>
                   {q.explanation}
                 </p>
               )}
-            </Card>
+            </div>
           );
         })}
       </div>

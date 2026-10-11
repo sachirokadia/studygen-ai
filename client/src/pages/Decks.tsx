@@ -1,14 +1,17 @@
 import { useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { Link } from "react-router-dom";
-import { FileText, Link2, Plus, Type, Lightbulb } from "lucide-react";
+import { FileText, Link2, Plus, Type, Lightbulb, X } from "lucide-react";
 import clsx from "clsx";
 import { api, ApiError, type Deck, type StudyPackResult } from "../lib/api";
 import { useLang } from "../lib/i18n";
-import { Button, Card, EmptyState, ErrorState, Field, LoadingState, Modal, PageHeader, TextArea, TextInput } from "../components/ui";
+import { Button, EmptyState, ErrorState, Field, LoadingState, Modal, PageBg, Pill, Sticker, TextArea, TextInput } from "../components/ui";
 import { AiNotice } from "../components/ui";
+import Creature, { type CreatureKind } from "../components/creatures";
 
 type SourceTab = "pdf" | "youtube" | "text" | "topic";
+
+const DECK_CREATURES: CreatureKind[] = ["grey", "orange", "chick", "dog"];
 
 async function extractPdfText(file: File): Promise<string> {
   const pdfjs = await import("pdfjs-dist");
@@ -108,16 +111,14 @@ function NewDeckModal({ onClose, onCreated }: { onClose: () => void; onCreated: 
     <Modal title={t("decks.newFromSource")} onClose={onClose}>
       <div className="mb-4 grid grid-cols-4 gap-2">
         {tabs.map((tb) => (
-          <button
-            key={tb.id}
-            onClick={() => setTab(tb.id)}
-            className={clsx(
-              "flex flex-col items-center gap-1 rounded-xl border px-2 py-3 text-xs font-medium transition",
-              tab === tb.id ? "border-indigo-500 bg-indigo-50 text-indigo-700" : "border-slate-200 text-slate-500 hover:bg-slate-50",
-            )}
-          >
-            <tb.icon className="h-5 w-5" />
-            {tb.label}
+          <button key={tb.id} onClick={() => setTab(tb.id)} className="flex justify-center">
+            <Sticker
+              color={tab === tb.id ? "bg-btnyellow" : "bg-paper"}
+              className={clsx("flex-col !px-3 !py-2", tab !== tb.id && "opacity-60 hover:opacity-100")}
+            >
+              <tb.icon className="h-5 w-5" strokeWidth={2.75} />
+              {tb.label}
+            </Sticker>
           </button>
         ))}
       </div>
@@ -138,7 +139,7 @@ function NewDeckModal({ onClose, onCreated }: { onClose: () => void; onCreated: 
                 if (f) void handlePdf(f);
               }}
             />
-            {pdfName && <p className="mt-1 text-xs text-slate-500">{pdfName} — {textContent.length} chars extracted</p>}
+            {pdfName && <p className="mt-1 font-body text-xs font-bold text-ink/60">{pdfName} — {textContent.length} chars extracted</p>}
           </Field>
         )}
 
@@ -166,7 +167,7 @@ function NewDeckModal({ onClose, onCreated }: { onClose: () => void; onCreated: 
         )}
 
         {aiMissing && <AiNotice message={t("common.aiNotConfigured")} />}
-        {error && <p className="text-sm text-red-600">{error}</p>}
+        {error && <p className="font-body text-sm font-bold text-red-600">{error}</p>}
 
         <Button onClick={handleGenerate} disabled={busy} className="w-full">
           {busy ? t("decks.generating") : t("decks.generatePack")}
@@ -183,49 +184,66 @@ export default function Decks() {
 
   const decksQ = useQuery({ queryKey: ["decks"], queryFn: () => api.get<Deck[]>("/decks") });
 
+  const decks = decksQ.data ?? [];
+
   return (
     <div>
-      <PageHeader
-        title={t("decks.title")}
-        action={
-          <Button onClick={() => setModalOpen(true)}>
-            <Plus className="h-4 w-4" />
-            {t("decks.newFromSource")}
-          </Button>
-        }
-      />
-
-      {decksQ.isLoading ? (
-        <LoadingState label={t("common.loading")} />
-      ) : decksQ.isError ? (
-        <ErrorState message={t("common.error")} onRetry={() => decksQ.refetch()} retryLabel={t("common.retry")} />
-      ) : decksQ.data && decksQ.data.length > 0 ? (
-        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-          {decksQ.data.map((deck) => (
-            <Link key={deck.id} to={`/decks/${deck.id}`}>
-              <Card className="transition hover:shadow-md">
-                <h3 className="font-semibold">{deck.title}</h3>
-                <p className="mt-1 text-xs uppercase tracking-wide text-slate-400">{deck.sourceType}</p>
-                {deck.summary && <p className="mt-2 line-clamp-2 text-sm text-slate-500">{deck.summary.slice(0, 140)}</p>}
-                <p className="mt-3 text-xs text-slate-500">
-                  {deck.cardCount} {t("decks.cards")} · {deck.quizCount} {t("decks.quizzes")}
-                </p>
-              </Card>
+      <PageBg variant="night" />
+      <div className="board-cream mx-auto max-w-4xl p-4 md:p-6">
+        <div className="mb-5 flex items-center justify-between gap-3">
+          <h1 className="title-chunky">Joblings</h1>
+          <div className="flex items-center gap-2">
+            <Pill>
+              {decks.length} / {decks.length}
+            </Pill>
+            <Link to="/" className="btn-pink btn-sm" aria-label="Home">
+              <X className="h-4 w-4" strokeWidth={3} />
             </Link>
-          ))}
+          </div>
         </div>
-      ) : (
-        <EmptyState
-          title={t("common.empty")}
-          hint={t("decks.empty")}
-          action={
-            <Button onClick={() => setModalOpen(true)}>
-              <Plus className="h-4 w-4" />
-              {t("decks.newFromSource")}
-            </Button>
-          }
-        />
-      )}
+
+        {decksQ.isLoading ? (
+          <LoadingState label={t("common.loading")} />
+        ) : decksQ.isError ? (
+          <ErrorState message={t("common.error")} onRetry={() => decksQ.refetch()} retryLabel={t("common.retry")} />
+        ) : decks.length > 0 ? (
+          <div className="grid grid-cols-2 gap-3 md:grid-cols-3">
+            {decks.map((deck, i) => (
+              <Link key={deck.id} to={`/decks/${deck.id}`} className="paper-card relative p-3 text-left">
+                <div className="flex items-start justify-between">
+                  <span className="font-display text-base font-extrabold text-ink/50">
+                    {String(i + 1).padStart(2, "0")}
+                  </span>
+                  {i === 0 && <Sticker className="!text-xs">NEW</Sticker>}
+                </div>
+                <div className="my-2 flex justify-center">
+                  <Creature kind={DECK_CREATURES[i % DECK_CREATURES.length]!} size={72} className="animate-bob" />
+                </div>
+                <h3 className="font-display text-lg font-extrabold leading-tight">{deck.title}</h3>
+                <Pill color="bg-btnblue" className="mt-2 !text-xs">
+                  {deck.cardCount} {t("decks.cards")}
+                </Pill>
+              </Link>
+            ))}
+          </div>
+        ) : (
+          <EmptyState
+            title={t("common.empty")}
+            hint={t("decks.empty")}
+            action={
+              <Button onClick={() => setModalOpen(true)}>
+                <Plus className="h-4 w-4" strokeWidth={2.75} />
+                {t("decks.newFromSource")}
+              </Button>
+            }
+          />
+        )}
+
+        <Button variant="yellow" onClick={() => setModalOpen(true)} className="mt-6 w-full">
+          <Plus className="h-5 w-5" strokeWidth={2.75} />
+          {t("decks.newFromSource")}
+        </Button>
+      </div>
 
       {modalOpen && (
         <NewDeckModal

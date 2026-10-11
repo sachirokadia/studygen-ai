@@ -1,11 +1,10 @@
 import { useEffect, useMemo, useState } from "react";
 import { useMutation, useQuery } from "@tanstack/react-query";
-import { useNavigate, useParams } from "react-router-dom";
-import { Timer } from "lucide-react";
+import { Link, useNavigate, useParams } from "react-router-dom";
 import clsx from "clsx";
 import { api, ApiError, type Quiz } from "../lib/api";
 import { useLang } from "../lib/i18n";
-import { Button, Card, EmptyState, ErrorState, LoadingState, PageHeader } from "../components/ui";
+import { Button, Card, EmptyState, ErrorState, HangTag, LoadingState, PageBg } from "../components/ui";
 
 function shuffle<T>(arr: T[]): T[] {
   const a = [...arr];
@@ -77,34 +76,40 @@ export default function QuizTake() {
 
   return (
     <div className="mx-auto max-w-3xl">
-      <PageHeader title={quiz.title} />
+      <PageBg variant="night" />
+      <h1 className="title-chunky-light text-center">Focus</h1>
+      <div className="mb-4 mt-2 flex justify-center">
+        <HangTag color="bg-machinepurple" className="!text-base">
+          {quiz.title}
+        </HangTag>
+      </div>
+
       {secondsLeft !== null && (
-        <div className={clsx("mb-4 flex items-center gap-2 rounded-xl px-4 py-2 text-sm font-semibold", urgent ? "bg-red-50 text-red-700" : "bg-indigo-50 text-indigo-700")}>
-          <Timer className="h-4 w-4" />
-          {t("quiz.timeLeft")}: {formatTime(secondsLeft)}
+        <div className="mb-6 flex justify-center">
+          <div className={clsx("paper-card mx-auto w-fit px-8 py-3 text-center", urgent && "!bg-btnpink")}>
+            <span className="font-display text-5xl font-extrabold">{formatTime(secondsLeft)}</span>
+          </div>
         </div>
       )}
-      {autoSubmitted && <p className="mb-4 text-sm text-amber-600">{t("quiz.autoSubmitted")}</p>}
+      {autoSubmitted && <p className="mb-4 text-center font-display text-2xl font-extrabold text-btnyellow">{t("quiz.autoSubmitted")}</p>}
 
-      <div className="space-y-4">
+      <div className="space-y-5">
         {questions.map((q, qi) => (
           <Card key={q.id}>
-            <p className="font-medium">
+            <p className="font-display text-2xl font-extrabold leading-snug">
               {qi + 1}. {q.question}
             </p>
-            <div className="mt-3 space-y-2">
+            <div className="mt-4 space-y-2.5">
               {q.options.map((opt, oi) => (
                 <button
                   key={oi}
                   onClick={() => setAnswers((a) => ({ ...a, [q.id]: oi }))}
                   className={clsx(
-                    "w-full rounded-xl border px-4 py-2.5 text-left text-sm transition",
-                    answers[q.id] === oi
-                      ? "border-indigo-500 bg-indigo-50 font-medium text-indigo-800"
-                      : "border-slate-200 hover:bg-slate-50",
+                    "btn-cream btn-sm w-full text-left",
+                    answers[q.id] === oi && "!bg-btnyellow",
                   )}
                 >
-                  {opt}
+                  <span className="font-body text-sm font-bold">{opt}</span>
                 </button>
               ))}
             </div>
@@ -112,9 +117,14 @@ export default function QuizTake() {
         ))}
       </div>
 
-      <Button onClick={() => submitMut.mutate()} disabled={submitMut.isPending} className="mt-6 w-full">
-        {submitMut.isPending ? t("common.loading") : t("quiz.submit")}
-      </Button>
+      <div className="mt-8 flex flex-col gap-3 sm:flex-row">
+        <Button variant="blue" onClick={() => submitMut.mutate()} disabled={submitMut.isPending} className="flex-1">
+          {submitMut.isPending ? t("common.loading") : t("quiz.submit")}
+        </Button>
+        <Link to={`/decks/${quiz.deckId}`} className="btn-pink btn-sm text-center">
+          QUIT
+        </Link>
+      </div>
     </div>
   );
 }

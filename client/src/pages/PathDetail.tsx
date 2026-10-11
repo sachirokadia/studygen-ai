@@ -5,14 +5,15 @@ import { ArrowLeft, CheckCircle2, Circle, Loader, Plus } from "lucide-react";
 import clsx from "clsx";
 import { api, type LearningPath, type PathTopic, type TopicStatus } from "../lib/api";
 import { useLang } from "../lib/i18n";
-import { Button, Card, EmptyState, ErrorState, Field, LoadingState, Modal, PageHeader, TextArea, TextInput } from "../components/ui";
+import { Button, EmptyState, ErrorState, Field, LoadingState, Modal, PageBg, PageHeader, Pill, TextArea, TextInput } from "../components/ui";
+import Creature from "../components/creatures";
 
 const STATUS_CYCLE: Record<TopicStatus, TopicStatus> = { todo: "doing", doing: "done", done: "todo" };
 
-const STATUS_META: Record<TopicStatus, { icon: typeof Circle; cls: string; key: "paths.todo" | "paths.doing" | "paths.done" }> = {
-  todo: { icon: Circle, cls: "text-slate-400", key: "paths.todo" },
-  doing: { icon: Loader, cls: "text-amber-500", key: "paths.doing" },
-  done: { icon: CheckCircle2, cls: "text-green-500", key: "paths.done" },
+const STATUS_META: Record<TopicStatus, { icon: typeof Circle; nodeBg: string; key: "paths.todo" | "paths.doing" | "paths.done" }> = {
+  todo: { icon: Circle, nodeBg: "bg-paper", key: "paths.todo" },
+  doing: { icon: Loader, nodeBg: "bg-sunny", key: "paths.doing" },
+  done: { icon: CheckCircle2, nodeBg: "bg-grass", key: "paths.done" },
 };
 
 export default function PathDetail() {
@@ -51,75 +52,94 @@ export default function PathDetail() {
   const topics = path.topics ?? [];
   const doneCount = topics.filter((x) => x.status === "done").length;
   const pct = topics.length > 0 ? Math.round((doneCount / topics.length) * 100) : 0;
+  const complete = topics.length > 0 && pct === 100;
 
   return (
-    <div className="mx-auto max-w-3xl">
-      <Link to="/paths" className="mb-4 flex items-center gap-1 text-sm text-slate-500 hover:text-slate-800">
-        <ArrowLeft className="h-4 w-4" />
-        {t("btn.back")}
-      </Link>
-      <PageHeader
-        title={path.title}
-        action={
-          <Button variant="secondary" onClick={() => setModalOpen(true)}>
-            <Plus className="h-4 w-4" />
-            {t("paths.newTopic")}
-          </Button>
-        }
-      />
-      {path.description && <p className="mb-4 text-sm text-slate-500">{path.description}</p>}
-
-      {topics.length > 0 && (
-        <div className="mb-4">
-          <div className="h-2.5 overflow-hidden rounded-full bg-slate-100">
-            <div className="h-full rounded-full bg-gradient-to-r from-indigo-500 to-violet-500 transition-all" style={{ width: `${pct}%` }} />
-          </div>
-          <p className="mt-1 text-xs text-slate-500">
-            {doneCount}/{topics.length} · {pct}%
-          </p>
-        </div>
-      )}
-
-      {topics.length === 0 ? (
-        <EmptyState
-          title={t("common.empty")}
+    <div>
+      <PageBg variant="sky" />
+      <div className="paper-card washi relative mx-auto max-w-3xl p-6 pt-7">
+        <Link to="/paths" className="mb-4 inline-flex items-center gap-1 font-display text-lg font-extrabold uppercase text-ink/60 hover:text-ink">
+          <ArrowLeft className="h-5 w-5" strokeWidth={2.75} />
+          {t("btn.back")}
+        </Link>
+        <PageHeader
+          title={path.title}
           action={
-            <Button onClick={() => setModalOpen(true)}>
-              <Plus className="h-4 w-4" />
+            <Button variant="yellow" onClick={() => setModalOpen(true)} className="btn-sm">
+              <Plus className="h-4 w-4" strokeWidth={2.75} />
               {t("paths.newTopic")}
             </Button>
           }
         />
-      ) : (
-        <div className="space-y-2">
-          {topics.map((topic, i) => {
-            const meta = STATUS_META[topic.status];
-            const Icon = meta.icon;
-            return (
-              <Card key={topic.id} className="!p-4">
-                <div className="flex items-start gap-3">
+        {topics.length > 0 && (
+          <div className="mb-4">
+            <Pill color={complete ? "bg-grass" : "bg-btnyellow"}>
+              {doneCount}/{topics.length} {t("paths.done")} · {pct}%
+            </Pill>
+          </div>
+        )}
+        {path.description && <p className="mb-4 font-body text-sm font-semibold text-ink/60">{path.description}</p>}
+
+        {complete && (
+          <div className="paper-card washi relative mb-6 flex items-center gap-4 !bg-grass/30 p-4">
+            <Creature kind="dog" size={72} className="animate-bob" />
+            <p className="font-display text-3xl font-extrabold uppercase">{t("paths.done")}!</p>
+          </div>
+        )}
+
+        {topics.length === 0 ? (
+          <EmptyState
+            title={t("common.empty")}
+            action={
+              <Button variant="yellow" onClick={() => setModalOpen(true)}>
+                <Plus className="h-4 w-4" strokeWidth={2.75} />
+                {t("paths.newTopic")}
+              </Button>
+            }
+          />
+        ) : (
+          <div className="relative ml-5 border-l-4 border-dotted border-ink/40 pl-8">
+            {topics.map((topic, i) => {
+              const meta = STATUS_META[topic.status];
+              const Icon = meta.icon;
+              return (
+                <div key={topic.id} className="relative pb-5 last:pb-0">
                   <button
                     onClick={() => statusMut.mutate({ topicId: topic.id, status: STATUS_CYCLE[topic.status] })}
-                    className={clsx("mt-0.5 rounded-full transition hover:scale-110", meta.cls)}
+                    className={clsx(
+                      "absolute -left-[3.35rem] top-3 flex h-10 w-10 items-center justify-center rounded-full border-[3px] border-ink shadow-chunkySm transition hover:scale-110",
+                      meta.nodeBg,
+                    )}
                     title={t(meta.key)}
                     aria-label={`Mark as ${STATUS_CYCLE[topic.status]}`}
                   >
-                    <Icon className="h-6 w-6" />
+                    <Icon className="h-5 w-5 text-ink" />
                   </button>
-                  <div className="flex-1">
-                    <p className={clsx("font-medium", topic.status === "done" && "text-slate-400 line-through")}>
-                      <span className="mr-2 text-xs text-slate-400">{i + 1}.</span>
-                      {topic.title}
-                    </p>
-                    {topic.description && <p className="mt-1 text-sm text-slate-500">{topic.description}</p>}
-                    <p className="mt-1 text-xs text-slate-400">{t(meta.key)}</p>
+                  <div className="paper-card p-4">
+                    <div className="flex items-center gap-2">
+                      <Pill color="bg-btnyellow">{i + 1}</Pill>
+                      <p className={clsx("flex-1 font-body font-bold text-ink", topic.status === "done" && "text-ink/40 line-through")}>
+                        {topic.title}
+                      </p>
+                    </div>
+                    {topic.description && <p className="mt-1 font-body text-sm font-semibold text-ink/60">{topic.description}</p>}
+                    <div className="mt-3 flex items-center justify-between gap-2">
+                      <p className="font-display text-base font-extrabold uppercase text-ink/50">{t(meta.key)}</p>
+                      <Button
+                        variant="blue"
+                        className="btn-sm"
+                        onClick={() => statusMut.mutate({ topicId: topic.id, status: STATUS_CYCLE[topic.status] })}
+                      >
+                        STUDY
+                      </Button>
+                    </div>
                   </div>
                 </div>
-              </Card>
-            );
-          })}
-        </div>
-      )}
+              );
+            })}
+          </div>
+        )}
+      </div>
 
       {modalOpen && (
         <Modal title={t("paths.newTopic")} onClose={() => setModalOpen(false)}>
@@ -130,10 +150,10 @@ export default function PathDetail() {
             <Field label={t("paths.topicDesc")}>
               <TextArea value={topicDesc} onChange={(e) => setTopicDesc(e.target.value)} rows={3} />
             </Field>
-            <Button onClick={() => addTopicMut.mutate()} disabled={addTopicMut.isPending || !topicTitle.trim()} className="w-full">
+            <Button variant="blue" onClick={() => addTopicMut.mutate()} disabled={addTopicMut.isPending || !topicTitle.trim()} className="w-full">
               {addTopicMut.isPending ? t("common.loading") : t("btn.add")}
             </Button>
-            {addTopicMut.isError && <p className="text-sm text-red-600">{t("common.error")}</p>}
+            {addTopicMut.isError && <p className="font-body text-sm font-bold text-red-700">{t("common.error")}</p>}
           </div>
         </Modal>
       )}

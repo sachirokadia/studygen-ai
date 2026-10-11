@@ -1,10 +1,13 @@
 import { useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Link } from "react-router-dom";
-import { Map as MapIcon, Plus, Trash2 } from "lucide-react";
+import { Plus, Trash2 } from "lucide-react";
 import { api, type LearningPath } from "../lib/api";
 import { useLang } from "../lib/i18n";
-import { Button, Card, EmptyState, ErrorState, Field, LoadingState, Modal, PageHeader, TextArea, TextInput } from "../components/ui";
+import { Button, EmptyState, ErrorState, Field, LoadingState, Modal, PageBg, PageHeader, Pill, TextArea, TextInput } from "../components/ui";
+import Creature, { OrangeBlob, SpottedDog, type CreatureKind } from "../components/creatures";
+
+const KIND_CYCLE: CreatureKind[] = ["grey", "orange", "chick", "dog"];
 
 export default function Paths() {
   const { t } = useLang();
@@ -32,11 +35,12 @@ export default function Paths() {
 
   return (
     <div>
+      <PageBg variant="sky" />
       <PageHeader
-        title={t("paths.title")}
+        title={t("nav.paths")}
         action={
-          <Button onClick={() => setModalOpen(true)}>
-            <Plus className="h-4 w-4" />
+          <Button variant="yellow" onClick={() => setModalOpen(true)}>
+            <Plus className="h-4 w-4" strokeWidth={2.75} />
             {t("paths.new")}
           </Button>
         }
@@ -47,34 +51,58 @@ export default function Paths() {
       ) : pathsQ.isError ? (
         <ErrorState message={t("common.error")} onRetry={() => pathsQ.refetch()} retryLabel={t("common.retry")} />
       ) : pathsQ.data && pathsQ.data.length > 0 ? (
-        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-          {pathsQ.data.map((p) => (
-            <Card key={p.id} className="group relative">
-              <Link to={`/paths/${p.id}`}>
-                <div className="flex items-center gap-2">
-                  <MapIcon className="h-5 w-5 text-indigo-500" />
-                  <h3 className="font-semibold">{p.title}</h3>
+        <div className="board-red p-4 md:p-6">
+          <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+            {pathsQ.data.map((p, idx) => {
+              const total = p.topics?.length ?? 0;
+              const done = p.topics?.filter((x) => x.status === "done").length ?? 0;
+              return (
+                <div key={p.id} className="paper-card washi relative p-4 pt-5">
+                  <div className="mb-2 flex items-center gap-3">
+                    <Creature kind={KIND_CYCLE[idx % KIND_CYCLE.length]} size={56} className="animate-bob" />
+                    <Link to={`/paths/${p.id}`}>
+                      <h3 className="font-display text-xl font-extrabold uppercase leading-tight hover:underline">{p.title}</h3>
+                    </Link>
+                  </div>
+                  {p.description && (
+                    <p className="line-clamp-2 font-body text-sm font-semibold text-ink/60">{p.description}</p>
+                  )}
+                  <div className="mt-3 flex flex-wrap items-center gap-2">
+                    {total > 0 && (
+                      <Pill color={done === total ? "bg-grass" : "bg-btnyellow"}>
+                        {done}/{total} {t("paths.done")}
+                      </Pill>
+                    )}
+                    <div className="flex-1" />
+                    <Link to={`/paths/${p.id}`} className="btn-blue btn-sm">
+                      OPEN
+                    </Link>
+                    <Button
+                      variant="pink"
+                      className="btn-sm"
+                      onClick={() => {
+                        if (window.confirm(t("common.confirmDelete"))) deleteMut.mutate(p.id);
+                      }}
+                      aria-label="Delete path"
+                    >
+                      <Trash2 className="h-4 w-4" strokeWidth={2.75} />
+                    </Button>
+                  </div>
                 </div>
-                {p.description && <p className="mt-2 line-clamp-2 text-sm text-slate-500">{p.description}</p>}
-              </Link>
-              <button
-                onClick={() => {
-                  if (window.confirm(t("common.confirmDelete"))) deleteMut.mutate(p.id);
-                }}
-                className="absolute right-3 top-3 rounded-lg p-1.5 text-slate-300 opacity-0 transition hover:bg-red-50 hover:text-red-600 group-hover:opacity-100"
-                aria-label="Delete path"
-              >
-                <Trash2 className="h-4 w-4" />
-              </button>
-            </Card>
-          ))}
+              );
+            })}
+          </div>
+          <div className="mt-4 flex items-end justify-center gap-8">
+            <OrangeBlob size={88} className="animate-bob" />
+            <SpottedDog size={88} className="animate-bob" />
+          </div>
         </div>
       ) : (
         <EmptyState
           title={t("paths.empty")}
           action={
-            <Button onClick={() => setModalOpen(true)}>
-              <Plus className="h-4 w-4" />
+            <Button variant="yellow" onClick={() => setModalOpen(true)}>
+              <Plus className="h-4 w-4" strokeWidth={2.75} />
               {t("paths.new")}
             </Button>
           }
@@ -90,10 +118,10 @@ export default function Paths() {
             <Field label={t("paths.topicDesc")}>
               <TextArea value={description} onChange={(e) => setDescription(e.target.value)} rows={3} />
             </Field>
-            <Button onClick={() => createMut.mutate()} disabled={createMut.isPending || !title.trim()} className="w-full">
+            <Button variant="blue" onClick={() => createMut.mutate()} disabled={createMut.isPending || !title.trim()} className="w-full">
               {createMut.isPending ? t("common.loading") : t("btn.create")}
             </Button>
-            {createMut.isError && <p className="text-sm text-red-600">{t("common.error")}</p>}
+            {createMut.isError && <p className="font-body text-sm font-bold text-red-700">{t("common.error")}</p>}
           </div>
         </Modal>
       )}

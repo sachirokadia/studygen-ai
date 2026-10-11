@@ -1,12 +1,12 @@
 import { useEffect, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { CheckCircle2 } from "lucide-react";
-import clsx from "clsx";
 import { api, type Flashcard } from "../lib/api";
 import { useLang } from "../lib/i18n";
-import { Button, Card, EmptyState, ErrorState, LoadingState, PageHeader } from "../components/ui";
+import { Button, Card, EmptyState, ErrorState, LoadingState, PageBg, PageHeader, Pill } from "../components/ui";
+import Creature, { type CreatureKind } from "../components/creatures";
 
 const GRADES = [1, 2, 3, 4] as const;
+const GRADE_VARIANTS = ["pink", "yellow", "blue", "green"] as const;
 
 export default function Review() {
   const { t } = useLang();
@@ -16,6 +16,7 @@ export default function Review() {
   const [flipped, setFlipped] = useState(false);
   const [reviewed, setReviewed] = useState(0);
   const [loaded, setLoaded] = useState(false);
+  const [lastGrade, setLastGrade] = useState<number | null>(null);
 
   const dueQ = useQuery({ queryKey: ["due"], queryFn: () => api.get<Flashcard[]>("/flashcards/due") });
 
@@ -43,6 +44,7 @@ export default function Review() {
     const card = queue[index];
     if (!card) return;
     gradeMut.mutate({ cardId: card.id, grade });
+    setLastGrade(grade);
     setReviewed((r) => r + 1);
     setFlipped(false);
     setIndex((i) => i + 1);
@@ -55,17 +57,21 @@ export default function Review() {
   const done = loaded && index >= queue.length;
   const card = queue[index];
 
+  const mascot: CreatureKind =
+    done || lastGrade === null ? (done ? "dog" : "chick") : lastGrade >= 3 ? "dog" : "grey";
+
   return (
     <div className="mx-auto max-w-2xl">
+      <PageBg variant="sky" />
       <PageHeader title={t("review.title")} />
 
       {!loaded || queue.length === 0 ? (
         <EmptyState title={t("review.empty")} />
       ) : done ? (
-        <Card className="text-center">
-          <CheckCircle2 className="mx-auto h-12 w-12 text-green-500" />
-          <h2 className="mt-3 text-xl font-bold">{t("review.done")}</h2>
-          <p className="mt-1 text-slate-500">
+        <Card className="washi relative text-center">
+          <Creature kind="dog" size={104} className="mx-auto animate-bob" />
+          <h2 className="mt-3 font-display text-4xl font-extrabold uppercase">{t("review.done")}</h2>
+          <p className="mt-1 font-display text-2xl font-extrabold text-ink/60">
             {reviewed} {t("review.reviewed")}
           </p>
           <Button
@@ -75,6 +81,7 @@ export default function Review() {
               setLoaded(false);
               setIndex(0);
               setReviewed(0);
+              setLastGrade(null);
               dueQ.refetch();
             }}
           >
@@ -84,36 +91,36 @@ export default function Review() {
       ) : (
         card && (
           <div>
-            <p className="mb-3 text-center text-sm text-slate-500">
-              {index + 1} {t("review.of")} {queue.length}
-            </p>
-            <Card className="min-h-[240px] cursor-pointer" >
-              <div onClick={() => setFlipped((f) => !f)} className="flex min-h-[200px] flex-col items-center justify-center text-center">
-                <p className="text-lg font-medium">{flipped ? card.back : card.front}</p>
+            <div className="mb-4 flex items-center justify-center gap-4">
+              <Creature kind={mascot} size={80} className="animate-bob" />
+              <Pill color="bg-btnblue" className="!text-xl">
+                {index + 1} {t("review.of")} {queue.length}
+              </Pill>
+            </div>
+            <div
+              onClick={() => setFlipped((f) => !f)}
+              className="paper-card mx-auto max-w-2xl rotate-[1.5deg] cursor-pointer p-8 text-center"
+            >
+              <div className="flex min-h-[200px] flex-col items-center justify-center text-center">
+                <p className="font-display text-3xl font-extrabold leading-snug">{flipped ? card.back : card.front}</p>
                 {!flipped && (
                   <Button variant="secondary" className="mt-6" onClick={(e) => { e.stopPropagation(); setFlipped(true); }}>
                     {t("btn.flip")}
                   </Button>
                 )}
               </div>
-            </Card>
+            </div>
             {flipped && (
-              <div className="mt-4 grid grid-cols-4 gap-2">
-                {GRADES.map((g) => (
-                  <button
+              <div className="mt-5 grid grid-cols-2 gap-3 sm:grid-cols-4">
+                {GRADES.map((g, i) => (
+                  <Button
                     key={g}
+                    variant={GRADE_VARIANTS[i]}
                     onClick={() => handleGrade(g)}
                     disabled={gradeMut.isPending}
-                    className={clsx(
-                      "rounded-xl border px-2 py-3 text-sm font-semibold transition disabled:opacity-50",
-                      g === 1 && "border-red-200 bg-red-50 text-red-700 hover:bg-red-100",
-                      g === 2 && "border-amber-200 bg-amber-50 text-amber-700 hover:bg-amber-100",
-                      g === 3 && "border-indigo-200 bg-indigo-50 text-indigo-700 hover:bg-indigo-100",
-                      g === 4 && "border-green-200 bg-green-50 text-green-700 hover:bg-green-100",
-                    )}
                   >
                     {g}. {gradeLabels[g]}
-                  </button>
+                  </Button>
                 ))}
               </div>
             )}
