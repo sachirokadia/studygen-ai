@@ -5,6 +5,7 @@ import clsx from "clsx";
 import { api, type Deck, type Note } from "../lib/api";
 import { useLang } from "../lib/i18n";
 import { Button, EmptyState, ErrorState, Field, LoadingState, Modal, PageBg, PageHeader, TextArea, TextInput } from "../components/ui";
+import BookmarkToggle from "../components/BookmarkToggle";
 
 interface Cloze {
   ordinal: string;
@@ -142,6 +143,9 @@ export default function Notes() {
                 <p className="truncate font-display text-xl font-extrabold uppercase leading-tight">{n.title}</p>
                 <p className="mt-1 line-clamp-3 font-body text-xs font-semibold text-ink/60">{n.content.slice(0, 120)}</p>
                 <div className="mt-3 flex flex-wrap gap-2">
+                  <span onClick={(e) => e.stopPropagation()}>
+                    <BookmarkToggle kind="note" refId={n.id} label={n.title} />
+                  </span>
                   <Button
                     variant="cream"
                     className="btn-sm"

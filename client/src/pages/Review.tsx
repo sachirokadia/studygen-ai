@@ -15,6 +15,7 @@ export default function Review() {
   const [reviewed, setReviewed] = useState(0);
   const [loaded, setLoaded] = useState(false);
   const [lastGotIt, setLastGotIt] = useState<boolean | null>(null);
+  const [gradeError, setGradeError] = useState(false);
 
   const dueQ = useQuery({ queryKey: ["due"], queryFn: () => api.get<Flashcard[]>("/flashcards/due") });
 
@@ -33,12 +34,20 @@ export default function Review() {
 
   const handleGrade = (gotIt: boolean) => {
     const card = queue[index];
-    if (!card) return;
-    gradeMut.mutate({ cardId: card.id, grade: gotIt ? 4 : 2 });
-    setLastGotIt(gotIt);
-    setReviewed((r) => r + 1);
-    setFlipped(false);
-    setIndex((i) => i + 1);
+    if (!card || gradeMut.isPending) return;
+    setGradeError(false);
+    gradeMut.mutate(
+      { cardId: card.id, grade: gotIt ? 4 : 2 },
+      {
+        onSuccess: () => {
+          setLastGotIt(gotIt);
+          setReviewed((r) => r + 1);
+          setFlipped(false);
+          setIndex((i) => i + 1);
+        },
+        onError: () => setGradeError(true),
+      },
+    );
   };
 
   if (dueQ.isLoading) return <LoadingState label={t("common.loading")} />;
@@ -118,6 +127,11 @@ export default function Review() {
                 >
                   {t("review.gotIt")}
                 </Button>
+              </div>
+            )}
+            {gradeError && (
+              <div className="paper-card mt-4 border-btnpink p-4 text-center">
+                <p className="font-display text-xl font-extrabold uppercase">{t("review.saveFailed")}</p>
               </div>
             )}
           </div>

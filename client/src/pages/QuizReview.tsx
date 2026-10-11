@@ -47,7 +47,8 @@ export default function QuizReview() {
     );
 
   const quiz = quizQ.data;
-  const attempt = attemptsQ.data?.[0];
+  const attempts = attemptsQ.data ?? [];
+  const attempt = attempts[attempts.length - 1];
   if (!quiz || !attempt) return <EmptyState title={t("common.empty")} />;
 
   const pct = attempt.total > 0 ? Math.round((attempt.score / attempt.total) * 100) : 0;

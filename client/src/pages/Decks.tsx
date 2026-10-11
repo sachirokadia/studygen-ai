@@ -46,7 +46,9 @@ function NewDeckModal({ onClose, onCreated }: { onClose: () => void; onCreated: 
   const [error, setError] = useState("");
   const [aiMissing, setAiMissing] = useState(false);
 
-  const activeTab: SourceTab = showMore ? tab : "topic";
+  // The selected tab sticks even when "More options" is closed,
+  // so extracted PDF text / YouTube URLs are never discarded.
+  const activeTab: SourceTab = tab;
 
   const tabs: { id: SourceTab; label: string; icon: typeof FileText }[] = [
     { id: "pdf", label: t("decks.tabPdf"), icon: FileText },
@@ -78,6 +80,20 @@ function NewDeckModal({ onClose, onCreated }: { onClose: () => void; onCreated: 
       const res = await api.get<{ text: string }>(`/ai/youtube-transcript?url=${encodeURIComponent(youtubeUrl)}`);
       setTextContent(res.text);
       if (!title) setTitle("YouTube video");
+    } catch (err) {
+      setError(err instanceof ApiError ? err.message : t("common.error"));
+    } finally {
+      setBusy(false);
+    }
+  };
+
+  const handleEmptyPack = async () => {
+    const finalTitle = topic.trim() || title.trim() || "Untitled";
+    setBusy(true);
+    setError("");
+    try {
+      const deck = await api.post<Deck>("/decks", { title: finalTitle, sourceType: "topic" });
+      onCreated(deck.id);
     } catch (err) {
       setError(err instanceof ApiError ? err.message : t("common.error"));
     } finally {
@@ -134,6 +150,10 @@ function NewDeckModal({ onClose, onCreated }: { onClose: () => void; onCreated: 
 
         <Button onClick={handleGenerate} disabled={busy || !topic.trim()} className="w-full !py-4 !text-2xl">
           {busy ? t("decks.making") : t("decks.makeMyCards")}
+        </Button>
+
+        <Button variant="cream" onClick={handleEmptyPack} disabled={busy} className="w-full !py-3 !text-xl">
+          {t("decks.emptyPack")}
         </Button>
 
         <div className="text-center">
@@ -238,7 +258,7 @@ export default function Decks() {
                   <span className="font-display text-base font-extrabold text-ink/50">
                     {String(i + 1).padStart(2, "0")}
                   </span>
-                  {i === 0 && <Sticker className="!text-xs">NEW</Sticker>}
+                  {i === 0 && <Sticker className="!text-xs">{t("decks.new")}</Sticker>}
                 </div>
                 <div className="my-2 flex justify-center">
                   <Creature kind={DECK_CREATURES[i % DECK_CREATURES.length]!} size={72} className="animate-bob" />

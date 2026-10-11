@@ -19,9 +19,10 @@ function TodayTag() {
 }
 
 function Wallet() {
+  const { t } = useLang();
   const { data } = useQuery({ queryKey: ["today"], queryFn: () => api.get<TodayStats>("/study/today") });
   return (
-    <span className="wallet" title="Coins">
+    <span className="wallet" title={t("nav.coins")} aria-label={t("nav.coins")}>
       <Coins className="h-4 w-4" strokeWidth={2.75} />
       {data?.xpToday ?? 0}
     </span>

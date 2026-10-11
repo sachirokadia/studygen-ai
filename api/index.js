@@ -518,19 +518,22 @@ async function handleQuizAttempt(userId, quizId, body) {
   const qs = await db`SELECT * FROM quiz_questions WHERE quiz_id = ${quiz.id} ORDER BY order_index ASC`;
   const byId = new Map(qs.map((q) => [q.id, q]));
 
+  // Only count answers that match real questions — ignore stale IDs.
+  const validAnswers = answers.filter((a) => byId.has(a.questionId));
+  if (validAnswers.length < 1) throw new HttpError(400, "Invalid answers");
+
   let score = 0;
   const missed = [];
-  for (const a of answers) {
+  for (const a of validAnswers) {
     const q = byId.get(a.questionId);
-    if (!q) continue;
     if (a.selected === Number(q.correct_index)) score += 1;
     else missed.push(q);
   }
-  const total = answers.length;
+  const total = validAnswers.length;
 
   const inserted = await db`
     INSERT INTO quiz_attempts (id, quiz_id, user_id, score, total, answers, completed_at)
-    VALUES (gen_random_uuid(), ${quiz.id}, ${userId}, ${score}, ${total}, ${JSON.stringify(answers)}::jsonb, now())
+    VALUES (gen_random_uuid(), ${quiz.id}, ${userId}, ${score}, ${total}, ${JSON.stringify(validAnswers)}::jsonb, now())
     RETURNING id`;
   const attemptId = inserted[0] ? inserted[0].id : null;
 
@@ -986,6 +989,10 @@ const EXPLAIN_SYSTEM = {
 
 async function handleStudyPack(userId, body) {
   const { title, sourceType, sourceName, content } = body || {};
+  // Check AI first: when the key is missing, ALWAYS 503 with the friendly
+  // message — never a raw validation error for the same action.
+  aiConfig();
+
   if (typeof title !== "string" || !title.trim() || title.length > 300)
     throw new HttpError(400, "Invalid title");
   if (!SOURCE_TYPES.includes(sourceType)) throw new HttpError(400, "Invalid sourceType");
@@ -993,7 +1000,6 @@ async function handleStudyPack(userId, body) {
     throw new HttpError(400, "Invalid sourceName");
   if (typeof content !== "string" || content.length < 20 || content.length > 120000)
     throw new HttpError(400, "Invalid content");
-  aiConfig(); // 503 early when AI is not configured
 
   const db = getSql();
   const deckRows = await db`

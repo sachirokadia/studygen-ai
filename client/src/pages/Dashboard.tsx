@@ -12,8 +12,6 @@ export default function Dashboard() {
   const todayQ = useQuery({ queryKey: ["today"], queryFn: () => api.get<TodayStats>("/study/today") });
 
   const due = todayQ.data?.dueCount ?? 0;
-  // One big action: practice if there are cards, otherwise go make some.
-  const studyTarget = due > 0 ? "/review" : "/decks";
 
   return (
     <div>
@@ -40,16 +38,24 @@ export default function Dashboard() {
             <EmptyState title={t("home.allDone")} creature="dog" />
           )}
 
-          <Link to={studyTarget} className="btn-green mt-8 inline-flex !px-12 !py-5 !text-3xl">
-            {t("home.studyNow")}
-          </Link>
-
-          <div className="mt-4">
-            <Link to="/decks" className="btn-yellow btn-sm">
-              <Plus className="h-4 w-4" strokeWidth={2.75} />
+          {due > 0 ? (
+            <Link to="/review" className="btn-green mt-8 inline-flex !px-12 !py-5 !text-3xl">
+              {t("home.studyNow")}
+            </Link>
+          ) : (
+            <Link to="/decks" className="btn-green mt-8 inline-flex !px-12 !py-5 !text-3xl">
               {t("home.makeNew")}
             </Link>
-          </div>
+          )}
+
+          {due > 0 && (
+            <div className="mt-4">
+              <Link to="/decks" className="btn-yellow btn-sm">
+                <Plus className="h-4 w-4" strokeWidth={2.75} />
+                {t("home.makeNew")}
+              </Link>
+            </div>
+          )}
         </div>
       )}
     </div>

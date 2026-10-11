@@ -2,7 +2,7 @@ import { useEffect, useMemo, useState } from "react";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { Link, useNavigate, useParams } from "react-router-dom";
 import clsx from "clsx";
-import { api, ApiError, type Quiz } from "../lib/api";
+import { api, type Quiz } from "../lib/api";
 import { useLang } from "../lib/i18n";
 import { Button, Card, EmptyState, ErrorState, LoadingState, PageBg, Pill } from "../components/ui";
 
@@ -24,6 +24,8 @@ export default function QuizTake() {
   const [qi, setQi] = useState(0);
   const [secondsLeft, setSecondsLeft] = useState<number | null>(null);
   const [autoSubmitted, setAutoSubmitted] = useState(false);
+  const [missedMsg, setMissedMsg] = useState(false);
+  const [submitError, setSubmitError] = useState(false);
 
   const quizQ = useQuery({ queryKey: ["quiz", id], queryFn: () => api.get<Quiz>(`/quizzes/${id}`), enabled: !!id });
 
@@ -38,15 +40,39 @@ export default function QuizTake() {
   }, [quizQ.data]);
 
   const submitMut = useMutation({
-    mutationFn: () =>
-      api.post<{ score: number; total: number; attemptId: string }>(`/quizzes/${id}/attempt`, {
-        answers: questions.map((q) => ({ questionId: q.id, selected: answers[q.id] ?? -1 })),
-      }),
-    onSuccess: () => navigate(`/quiz/${id}/review`),
-    onError: (err) => {
-      if (err instanceof ApiError) alert(err.message);
+    mutationFn: (opts?: { auto?: boolean }) => {
+      const list = questions.map((q) => ({ questionId: q.id, selected: answers[q.id] ?? -1 }));
+      // On auto-submit (time's up), only send answered questions — never -1.
+      const payload = opts?.auto ? list.filter((a) => a.selected >= 0) : list;
+      return api.post<{ score: number; total: number; attemptId: string }>(`/quizzes/${id}/attempt`, {
+        answers: payload,
+      });
     },
+    onSuccess: () => navigate(`/quiz/${id}/review`),
+    onError: () => setSubmitError(true),
   });
+
+  const jumpToFirstMissed = () => {
+    const firstMissed = questions.findIndex((q) => answers[q.id] === undefined);
+    if (firstMissed >= 0) {
+      setMissedMsg(true);
+      setSubmitError(false);
+      setQi(firstMissed);
+      requestAnimationFrame(() => {
+        document.getElementById("quiz-card")?.scrollIntoView({ behavior: "smooth", block: "center" });
+      });
+    }
+  };
+
+  const handleDone = () => {
+    if (questions.some((q) => answers[q.id] === undefined)) {
+      jumpToFirstMissed();
+      return;
+    }
+    setMissedMsg(false);
+    setSubmitError(false);
+    submitMut.mutate();
+  };
 
   // Silent countdown — no timer shown, just auto-sends when time runs out.
   useEffect(() => {
@@ -58,7 +84,12 @@ export default function QuizTake() {
   useEffect(() => {
     if (secondsLeft === 0 && !submitMut.isPending && !autoSubmitted) {
       setAutoSubmitted(true);
-      submitMut.mutate();
+      // Time's up: send what they answered. If nothing answered, guide them instead.
+      if (questions.some((q) => answers[q.id] !== undefined)) {
+        submitMut.mutate({ auto: true });
+      } else {
+        jumpToFirstMissed();
+      }
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [secondsLeft]);
@@ -84,12 +115,16 @@ export default function QuizTake() {
       </div>
 
       <Card>
+        <div id="quiz-card">
         <p className="font-display text-3xl font-extrabold leading-snug">{q.question}</p>
         <div className="mt-6 space-y-3">
           {q.options.map((opt, oi) => (
             <button
               key={oi}
-              onClick={() => setAnswers((a) => ({ ...a, [q.id]: oi }))}
+              onClick={() => {
+                setAnswers((a) => ({ ...a, [q.id]: oi }));
+                setMissedMsg(false);
+              }}
               className={clsx(
                 "btn-cream w-full !py-4 text-left !text-lg",
                 answers[q.id] === oi && "!bg-btnyellow",
@@ -99,7 +134,27 @@ export default function QuizTake() {
             </button>
           ))}
         </div>
+        </div>
       </Card>
+
+      {missedMsg && (
+        <div className="paper-card mt-4 border-btnyellow p-4 text-center">
+          <p className="font-display text-xl font-extrabold uppercase">{t("quiz.missedOne")}</p>
+        </div>
+      )}
+
+      {submitError && (
+        <div className="mt-4">
+          <ErrorState
+            message={t("common.error")}
+            onRetry={() => {
+              setSubmitError(false);
+              handleDone();
+            }}
+            retryLabel={t("common.retry")}
+          />
+        </div>
+      )}
 
       <div className="mt-6 flex flex-col gap-3">
         {!isLast ? (
@@ -109,7 +164,7 @@ export default function QuizTake() {
         ) : (
           <Button
             variant="green"
-            onClick={() => submitMut.mutate()}
+            onClick={handleDone}
             disabled={submitMut.isPending}
             className="w-full !py-4 !text-2xl"
           >
