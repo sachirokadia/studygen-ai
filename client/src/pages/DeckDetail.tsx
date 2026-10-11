@@ -116,7 +116,7 @@ export default function DeckDetail() {
           </Pill>
         </div>
 
-        <Link to="/review" className="btn-blue mb-8 inline-flex w-full !py-4 !text-2xl">
+        <Link to={`/review?deckId=${deck.id}`} className="btn-blue mb-8 inline-flex w-full !py-4 !text-2xl">
           <Play className="h-5 w-5" strokeWidth={2.75} />
           {t("deck.studyPack")}
         </Link>

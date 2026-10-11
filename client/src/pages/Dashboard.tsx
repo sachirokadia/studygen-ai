@@ -1,6 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 import { Link } from "react-router-dom";
-import { Lightbulb, Plus, Star, Target, Timer } from "lucide-react";
+import { Bookmark, Lightbulb, Map, MessageCircle, Plus, Sparkles, Star, StickyNote, Target, Timer, Wrench } from "lucide-react";
 import { api, type TodayStats } from "../lib/api";
 import { useLang, type I18nKey } from "../lib/i18n";
 import { EmptyState, ErrorState, LoadingState, PageBg } from "../components/ui";
@@ -37,7 +37,9 @@ export default function Dashboard() {
   });
 
   const due = todayQ.data?.dueCount ?? 0;
+  const decksCount = todayQ.data?.decksCount ?? 0;
   const recs = (recsQ.data?.recommendations ?? []).slice(0, 3);
+  // Fix 5: brand-new users see a first-run CTA, not "All done!".
 
   return (
     <div>
@@ -60,6 +62,8 @@ export default function Dashboard() {
                 {t("home.cardsToPractice")}
               </p>
             </>
+          ) : decksCount === 0 ? (
+            <EmptyState title={t("home.firstPack")} creature="chick" />
           ) : (
             <EmptyState title={t("home.allDone")} creature="dog" />
           )}
@@ -70,7 +74,7 @@ export default function Dashboard() {
             </Link>
           ) : (
             <Link to="/decks" className="btn-green mt-8 inline-flex !px-12 !py-5 !text-3xl">
-              {t("home.makeNew")}
+              {decksCount === 0 ? t("home.makeFirst") : t("home.makeNew")}
             </Link>
           )}
 
@@ -82,6 +86,33 @@ export default function Dashboard() {
               </Link>
             </div>
           )}
+
+          {/* Fix 8: Tools — Notes, Paths, Ask AI, Chat, Focus, Saved — visible on the Dashboard. */}
+          <div className="mt-10 text-left">
+            <p className="mb-3 flex items-center justify-center gap-2 font-display text-xl font-extrabold uppercase text-ink/60">
+              <Wrench className="h-5 w-5" strokeWidth={2.75} />
+              {t("home.tools")}
+            </p>
+            <div className="grid grid-cols-3 gap-2">
+              {[
+                { to: "/notes", label: t("nav.notes"), icon: StickyNote, color: "bg-btnpink" },
+                { to: "/paths", label: t("nav.paths"), icon: Map, color: "bg-machinepurple" },
+                { to: "/explain", label: t("nav.explain"), icon: Sparkles, color: "bg-btnyellow" },
+                { to: "/chat", label: t("nav.chat"), icon: MessageCircle, color: "bg-grass" },
+                { to: "/focus", label: t("me.focus"), icon: Timer, color: "bg-sky" },
+                { to: "/bookmarks", label: t("nav.bookmarks"), icon: Bookmark, color: "bg-btnpink" },
+              ].map((tool) => (
+                <Link
+                  key={tool.to}
+                  to={tool.to}
+                  className={`nav-tag flex-col !gap-1 !p-3 !text-sm ${tool.color}`}
+                >
+                  <tool.icon className="h-6 w-6" strokeWidth={2.75} />
+                  {tool.label}
+                </Link>
+              ))}
+            </div>
+          </div>
 
           {recs.length > 0 && (
             <div className="mt-10 text-left">

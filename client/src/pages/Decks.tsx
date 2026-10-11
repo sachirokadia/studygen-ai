@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { FileText, Link2, Plus, Type, Lightbulb, X, Search } from "lucide-react";
 import clsx from "clsx";
 import { api, ApiError, type Deck, type StudyPackResult } from "../lib/api";
@@ -13,13 +13,14 @@ type SourceTab = "pdf" | "youtube" | "text" | "topic";
 
 const DECK_CREATURES: CreatureKind[] = ["grey", "orange", "chick", "dog"];
 
-async function extractPdfText(file: File): Promise<string> {
+async function extractPdfText(file: File): Promise<{ text: string; truncated: boolean }> {
   const pdfjs = await import("pdfjs-dist");
   const workerModule = (await import("pdfjs-dist/build/pdf.worker.min.mjs?url")) as { default: string };
   pdfjs.GlobalWorkerOptions.workerSrc = workerModule.default;
   const buf = await file.arrayBuffer();
   const pdf = await pdfjs.getDocument({ data: buf }).promise;
   const maxPages = Math.min(pdf.numPages, 40);
+  const truncated = pdf.numPages > 40;
   let text = "";
   for (let i = 1; i <= maxPages; i++) {
     const page = await pdf.getPage(i);
@@ -29,32 +30,31 @@ async function extractPdfText(file: File): Promise<string> {
         .map((item) => (typeof (item as { str?: string }).str === "string" ? (item as { str: string }).str : ""))
         .join(" ") + "\n";
   }
-  return text.slice(0, 60_000);
+  const sliced = text.slice(0, 60_000);
+  return { text: sliced, truncated: truncated || text.length > 60_000 };
 }
 
 function NewDeckModal({ onClose, onCreated }: { onClose: () => void; onCreated: (deckId?: string) => void }) {
   const { t } = useLang();
-  // Simple mode: just one big question. "More options" reveals the extras.
-  const [showMore, setShowMore] = useState(false);
   const [tab, setTab] = useState<SourceTab>("topic");
   const [title, setTitle] = useState("");
   const [textContent, setTextContent] = useState("");
   const [youtubeUrl, setYoutubeUrl] = useState("");
   const [topic, setTopic] = useState("");
   const [pdfName, setPdfName] = useState("");
+  const [pdfTruncated, setPdfTruncated] = useState(false);
   const [busy, setBusy] = useState(false);
+  const [progress, setProgress] = useState("");
   const [error, setError] = useState("");
   const [aiMissing, setAiMissing] = useState(false);
 
-  // The selected tab sticks even when "More options" is closed,
-  // so extracted PDF text / YouTube URLs are never discarded.
   const activeTab: SourceTab = tab;
 
   const tabs: { id: SourceTab; label: string; icon: typeof FileText }[] = [
+    { id: "topic", label: t("decks.tabTopic"), icon: Lightbulb },
     { id: "pdf", label: t("decks.tabPdf"), icon: FileText },
     { id: "youtube", label: t("decks.tabYoutube"), icon: Link2 },
     { id: "text", label: t("decks.tabText"), icon: Type },
-    { id: "topic", label: t("decks.tabTopic"), icon: Lightbulb },
   ];
 
   const handlePdf = async (file: File) => {
@@ -62,11 +62,13 @@ function NewDeckModal({ onClose, onCreated }: { onClose: () => void; onCreated: 
     if (!title) setTitle(file.name.replace(/\.pdf$/i, ""));
     setBusy(true);
     setError("");
+    setPdfTruncated(false);
     try {
-      const text = await extractPdfText(file);
+      const { text, truncated } = await extractPdfText(file);
       setTextContent(text);
+      setPdfTruncated(truncated);
     } catch {
-      setError(t("common.error"));
+      setError(t("decks.pdfError"));
     } finally {
       setBusy(false);
     }
@@ -80,8 +82,8 @@ function NewDeckModal({ onClose, onCreated }: { onClose: () => void; onCreated: 
       const res = await api.get<{ text: string }>(`/ai/youtube-transcript?url=${encodeURIComponent(youtubeUrl)}`);
       setTextContent(res.text);
       if (!title) setTitle("YouTube video");
-    } catch (err) {
-      setError(err instanceof ApiError ? err.message : t("common.error"));
+    } catch {
+      setError(t("decks.transcriptError"));
     } finally {
       setBusy(false);
     }
@@ -94,31 +96,50 @@ function NewDeckModal({ onClose, onCreated }: { onClose: () => void; onCreated: 
     try {
       const deck = await api.post<Deck>("/decks", { title: finalTitle, sourceType: "topic" });
       onCreated(deck.id);
-    } catch (err) {
-      setError(err instanceof ApiError ? err.message : t("common.error"));
+    } catch {
+      setError(t("decks.createError"));
     } finally {
       setBusy(false);
     }
   };
 
+  // Fix 2: button enabled based on the active source tab, not just the topic field.
+  const canGenerate =
+    !busy &&
+    (activeTab === "topic" ? topic.trim().length > 0 : textContent.trim().length > 0);
+
   const handleGenerate = async () => {
-    const content =
-      activeTab === "pdf" || activeTab === "text"
-        ? textContent
-        : activeTab === "youtube"
-          ? textContent
-          : topic;
-    const finalTitle =
-      topic.trim() ||
-      title.trim() ||
-      (activeTab === "youtube" ? "YouTube video" : pdfName || "Untitled");
-    if (!content.trim() || !finalTitle) {
-      setError(t("common.error"));
-      return;
+    // Fix 1: wrap short topics so the server's 20-char minimum never rejects them.
+    let content: string;
+    if (activeTab === "topic") {
+      const raw = topic.trim();
+      if (!raw) {
+        setError(t("decks.needTopic"));
+        return;
+      }
+      content = `Create a complete study pack about: ${raw}`;
+    } else {
+      content = textContent.trim();
+      if (!content) {
+        setError(t("decks.needContent"));
+        return;
+      }
     }
+    const finalTitle =
+      title.trim() ||
+      topic.trim() ||
+      (activeTab === "youtube" ? "YouTube video" : pdfName || "Untitled");
     setBusy(true);
     setError("");
     setAiMissing(false);
+    // Fix 3: clear progress states while generating.
+    const steps = [t("decks.progressReading"), t("decks.progressCards"), t("decks.progressQuiz")];
+    let stepIdx = 0;
+    setProgress(steps[0]!);
+    const timer = setInterval(() => {
+      stepIdx = Math.min(stepIdx + 1, steps.length - 1);
+      setProgress(steps[stepIdx]!);
+    }, 8000);
     try {
       const res = await api.post<StudyPackResult>("/ai/study-pack", {
         title: finalTitle,
@@ -126,10 +147,15 @@ function NewDeckModal({ onClose, onCreated }: { onClose: () => void; onCreated: 
         sourceName: activeTab === "pdf" ? pdfName : activeTab === "youtube" ? youtubeUrl : undefined,
         content: content.slice(0, 60_000),
       });
+      clearInterval(timer);
+      setProgress("");
       onCreated(res.deckId);
     } catch (err) {
+      clearInterval(timer);
+      setProgress("");
+      // Fix 1: friendly messages instead of raw server text.
       if (err instanceof ApiError && err.status === 503) setAiMissing(true);
-      else setError(err instanceof ApiError ? err.message : t("common.error"));
+      else setError(t("decks.generateError"));
     } finally {
       setBusy(false);
     }
@@ -138,89 +164,96 @@ function NewDeckModal({ onClose, onCreated }: { onClose: () => void; onCreated: 
   return (
     <Modal title={t("decks.newPack")} onClose={onClose}>
       <div className="space-y-4">
-        <Field label={t("decks.whatToLearn")}>
-          <TextInput
-            value={topic}
-            onChange={(e) => setTopic(e.target.value)}
-            placeholder={t("explain.topicPh")}
-            className="!py-4 !text-xl"
-            autoFocus
-          />
+        {/* Fix 10: source tabs always visible, no "More options" gate. */}
+        <div className="grid grid-cols-4 gap-2">
+          {tabs.map((tb) => (
+            <button key={tb.id} onClick={() => setTab(tb.id)} className="flex justify-center" type="button">
+              <Sticker
+                color={tab === tb.id ? "bg-btnyellow" : "bg-paper"}
+                className={clsx("flex-col !px-3 !py-2", tab !== tb.id && "opacity-60 hover:opacity-100")}
+              >
+                <tb.icon className="h-5 w-5" strokeWidth={2.75} />
+                {tb.label}
+              </Sticker>
+            </button>
+          ))}
+        </div>
+
+        {tab === "topic" && (
+          <Field label={t("decks.whatToLearn")}>
+            <TextInput
+              value={topic}
+              onChange={(e) => setTopic(e.target.value)}
+              placeholder={t("explain.topicPh")}
+              className="!py-4 !text-xl"
+              autoFocus
+            />
+          </Field>
+        )}
+
+        {tab === "pdf" && (
+          <Field label={t("decks.tabPdf")}>
+            <input
+              type="file"
+              accept="application/pdf"
+              className="input"
+              onChange={(e) => {
+                const f = e.target.files?.[0];
+                if (f) void handlePdf(f);
+              }}
+            />
+            {pdfName && <p className="mt-1 font-body text-xs font-bold text-ink/60">{pdfName}</p>}
+            {/* Fix 10: warn when the PDF was truncated. */}
+            {pdfTruncated && (
+              <p className="mt-2 font-body text-sm font-bold text-amber-700">{t("decks.pdfTruncated")}</p>
+            )}
+          </Field>
+        )}
+
+        {tab === "youtube" && (
+          <Field label={t("decks.youtubeUrl")}>
+            <div className="flex gap-2">
+              <TextInput value={youtubeUrl} onChange={(e) => setYoutubeUrl(e.target.value)} placeholder="https://youtube.com/watch?v=…" />
+              <Button variant="secondary" onClick={handleFetchTranscript} disabled={busy || !youtubeUrl.trim()}>
+                {t("decks.fetchTranscript")}
+              </Button>
+            </div>
+            {textContent && tab === "youtube" && (
+              <p className="mt-1 font-body text-xs font-bold text-green-700">{t("decks.transcriptReady")}</p>
+            )}
+          </Field>
+        )}
+
+        {tab === "text" && (
+          <Field label={t("decks.tabText")}>
+            <TextArea value={textContent} onChange={(e) => setTextContent(e.target.value)} placeholder="Paste your notes here…" rows={6} />
+          </Field>
+        )}
+
+        <Field label={t("decks.deckTitle")}>
+          <TextInput value={title} onChange={(e) => setTitle(e.target.value)} placeholder={topic || "Cell Biology 101"} />
         </Field>
 
-        <Button onClick={handleGenerate} disabled={busy || !topic.trim()} className="w-full !py-4 !text-2xl">
-          {busy ? t("decks.making") : t("decks.makeMyCards")}
+        <Button onClick={handleGenerate} disabled={!canGenerate} className="w-full !py-4 !text-2xl">
+          {busy ? progress || t("decks.making") : t("decks.makeMyCards")}
         </Button>
 
         <Button variant="cream" onClick={handleEmptyPack} disabled={busy} className="w-full !py-3 !text-xl">
           {t("decks.emptyPack")}
         </Button>
 
-        <div className="text-center">
-          <button
-            onClick={() => setShowMore((s) => !s)}
-            className="font-display text-lg font-extrabold text-ink/60 underline decoration-btnyellow decoration-[3px] underline-offset-4"
-          >
-            {t("decks.moreOptions")} {showMore ? "▲" : "▼"}
-          </button>
-        </div>
-
-        {showMore && (
-          <div className="space-y-4 border-t-[3px] border-dashed border-ink/20 pt-4">
-            <div className="mb-4 grid grid-cols-4 gap-2">
-              {tabs.map((tb) => (
-                <button key={tb.id} onClick={() => setTab(tb.id)} className="flex justify-center">
-                  <Sticker
-                    color={tab === tb.id ? "bg-btnyellow" : "bg-paper"}
-                    className={clsx("flex-col !px-3 !py-2", tab !== tb.id && "opacity-60 hover:opacity-100")}
-                  >
-                    <tb.icon className="h-5 w-5" strokeWidth={2.75} />
-                    {tb.label}
-                  </Sticker>
-                </button>
-              ))}
-            </div>
-
-            <Field label={t("decks.deckTitle")}>
-              <TextInput value={title} onChange={(e) => setTitle(e.target.value)} placeholder={topic || "Cell Biology 101"} />
-            </Field>
-
-            {tab === "pdf" && (
-              <Field label={t("decks.tabPdf")}>
-                <input
-                  type="file"
-                  accept="application/pdf"
-                  className="input"
-                  onChange={(e) => {
-                    const f = e.target.files?.[0];
-                    if (f) void handlePdf(f);
-                  }}
-                />
-                {pdfName && <p className="mt-1 font-body text-xs font-bold text-ink/60">{pdfName}</p>}
-              </Field>
-            )}
-
-            {tab === "youtube" && (
-              <Field label={t("decks.youtubeUrl")}>
-                <div className="flex gap-2">
-                  <TextInput value={youtubeUrl} onChange={(e) => setYoutubeUrl(e.target.value)} placeholder="https://youtube.com/watch?v=…" />
-                  <Button variant="secondary" onClick={handleFetchTranscript} disabled={busy || !youtubeUrl.trim()}>
-                    {t("decks.fetchTranscript")}
-                  </Button>
-                </div>
-              </Field>
-            )}
-
-            {tab === "text" && (
-              <Field label={t("decks.tabText")}>
-                <TextArea value={textContent} onChange={(e) => setTextContent(e.target.value)} placeholder="Paste your notes here…" rows={6} />
-              </Field>
-            )}
+        {aiMissing && <AiNotice message={t("common.aiNotConfigured")} />}
+        {error && (
+          <div className="text-center">
+            <p className="font-body text-sm font-bold text-red-600">{error}</p>
+            <button
+              onClick={handleGenerate}
+              className="mt-2 font-display text-lg font-extrabold text-ink underline decoration-btnyellow decoration-[3px] underline-offset-4"
+            >
+              {t("common.retry")}
+            </button>
           </div>
         )}
-
-        {aiMissing && <AiNotice message={t("common.aiNotConfigured")} />}
-        {error && <p className="font-body text-sm font-bold text-red-600">{error}</p>}
       </div>
     </Modal>
   );
@@ -229,6 +262,7 @@ function NewDeckModal({ onClose, onCreated }: { onClose: () => void; onCreated: 
 export default function Decks() {
   const { t } = useLang();
   const queryClient = useQueryClient();
+  const navigate = useNavigate();
   const [modalOpen, setModalOpen] = useState(false);
   const [search, setSearch] = useState("");
   const [sort, setSort] = useState<"az" | "newest" | "most">("newest");
@@ -327,9 +361,11 @@ export default function Decks() {
       {modalOpen && (
         <NewDeckModal
           onClose={() => setModalOpen(false)}
-          onCreated={() => {
+          onCreated={(deckId) => {
             setModalOpen(false);
             queryClient.invalidateQueries({ queryKey: ["decks"] });
+            // Fix 3: take the user straight to their new deck.
+            if (deckId) navigate(`/decks/${deckId}`);
           }}
         />
       )}

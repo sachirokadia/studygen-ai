@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useSearchParams } from "react-router-dom";
 import { api, type Flashcard } from "../lib/api";
 import { useLang } from "../lib/i18n";
 import { Button, Card, EmptyState, ErrorState, LoadingState, PageBg, PageHeader, Pill } from "../components/ui";
@@ -10,6 +11,9 @@ import { ClozeText, hasCloze, stripCloze } from "../lib/cloze";
 export default function Review() {
   const { t } = useLang();
   const queryClient = useQueryClient();
+  // Fix 9: optional deckId scopes the review to one deck.
+  const [searchParams] = useSearchParams();
+  const deckId = searchParams.get("deckId");
   const [queue, setQueue] = useState<Flashcard[]>([]);
   const [index, setIndex] = useState(0);
   const [flipped, setFlipped] = useState(false);
@@ -18,7 +22,10 @@ export default function Review() {
   const [lastGotIt, setLastGotIt] = useState<boolean | null>(null);
   const [gradeError, setGradeError] = useState(false);
 
-  const dueQ = useQuery({ queryKey: ["due"], queryFn: () => api.get<Flashcard[]>("/flashcards/due") });
+  const dueQ = useQuery({
+    queryKey: ["due", deckId],
+    queryFn: () => api.get<Flashcard[]>(deckId ? `/flashcards/due?deckId=${deckId}` : "/flashcards/due"),
+  });
 
   useEffect(() => {
     if (dueQ.data && !loaded) {

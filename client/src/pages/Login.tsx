@@ -57,6 +57,30 @@ export default function Login() {
             </Link>
           </p>
         </div>
+
+        {/* Fix 6: public landing — what StudyGen AI does, before the login wall. */}
+        <div className="paper-card washi relative mx-auto mt-6 w-full max-w-md p-6 text-center">
+          <h2 className="font-display text-3xl font-extrabold uppercase leading-tight">
+            {t("landing.headline")}
+          </h2>
+          <ul className="mt-4 space-y-3 text-left">
+            <li className="flex items-start gap-2">
+              <span className="pill !px-2 !py-1 !text-sm">1</span>
+              <span className="font-body text-sm font-bold text-ink/80">{t("landing.point1")}</span>
+            </li>
+            <li className="flex items-start gap-2">
+              <span className="pill !px-2 !py-1 !text-sm">2</span>
+              <span className="font-body text-sm font-bold text-ink/80">{t("landing.point2")}</span>
+            </li>
+            <li className="flex items-start gap-2">
+              <span className="pill !px-2 !py-1 !text-sm">3</span>
+              <span className="font-body text-sm font-bold text-ink/80">{t("landing.point3")}</span>
+            </li>
+          </ul>
+          <Link to="/register" className="btn-green mt-5 inline-flex w-full !py-4 !text-2xl">
+            {t("landing.getStarted")}
+          </Link>
+        </div>
       </div>
     </>
   );

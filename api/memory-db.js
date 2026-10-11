@@ -187,10 +187,14 @@ function execute(rawSql, values) {
   }
   if (sql.startsWith("SELECT * FROM flashcards WHERE user_id =") && sql.includes("due_at <=")) {
     const now = nowIso();
+    // Fix 9: deck-scoped query passes [userId, deckId, limit]; unfiltered passes [userId, limit].
+    const hasDeck = sql.includes("deck_id =");
+    const userId = v[0];
+    const deckId = hasDeck ? v[1] : null;
+    const limit = Number(hasDeck ? v[2] : v[1]) || 50;
     const rows = tables.flashcards
-      .filter((f) => f.user_id === v[0] && f.due_at <= now)
+      .filter((f) => f.user_id === userId && (!deckId || f.deck_id === deckId) && f.due_at <= now)
       .sort((a, b) => (a.due_at < b.due_at ? -1 : 1));
-    const limit = Number(v[1]) || 50;
     return rows.slice(0, limit).map((f) => ({ ...f }));
   }
   if (sql.startsWith("SELECT * FROM flashcards WHERE id =")) {

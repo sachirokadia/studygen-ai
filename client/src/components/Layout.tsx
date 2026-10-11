@@ -41,7 +41,7 @@ export default function Layout({ children }: { children: ReactNode }) {
   const { t } = useLang();
 
   return (
-    <div className="min-h-screen pb-28 md:pb-10">
+    <div className="min-h-screen pb-28 md:pb-6">
       {/* ===== Top bar: date tag | wallet ===== */}
       <header className="mx-auto max-w-6xl px-4 pt-4">
         <div className="flex items-center gap-2.5">
@@ -75,12 +75,12 @@ export default function Layout({ children }: { children: ReactNode }) {
 
       <main className="mx-auto max-w-6xl px-4 py-6">{children}</main>
 
-      {/* ===== Bottom nav: 4 paper tags ===== */}
+      {/* ===== Bottom nav: 4 paper tags (mobile only — desktop uses the top chain) ===== */}
       <nav
-        className="fixed inset-x-0 bottom-0 z-40 border-t-[3px] border-ink bg-paper/95 px-3 pb-3 pt-2 backdrop-blur md:static md:mx-auto md:mt-8 md:max-w-6xl md:border-[3px] md:bg-transparent md:px-4 md:backdrop-blur-none"
+        className="fixed inset-x-0 bottom-0 z-40 border-t-[3px] border-ink bg-paper/95 px-3 pb-3 pt-2 backdrop-blur md:hidden"
         aria-label="Main"
       >
-        <div className="grid grid-cols-4 gap-2 md:flex md:flex-wrap md:justify-center md:gap-3">
+        <div className="grid grid-cols-4 gap-2">
           {MAIN_NAV.map((item) => (
             <NavLink
               key={item.to}

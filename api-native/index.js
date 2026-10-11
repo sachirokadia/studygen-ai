@@ -326,12 +326,20 @@ async function handleDeleteDeck(userId, deckId) {
 async function handleDueCards(userId, query) {
   const raw = parseInt(String(query.limit ?? "50"), 10);
   const limit = Math.min(Math.max(Number.isFinite(raw) ? raw : 50, 1), 500);
+  // Fix 9: optional deckId filter for deck-scoped review.
+  const deckId = typeof query.deckId === "string" && isUuid(query.deckId) ? query.deckId : null;
   const db = getSql();
-  const rows = await db`
-    SELECT * FROM flashcards
-    WHERE user_id = ${userId} AND due_at <= now()
-    ORDER BY due_at ASC
-    LIMIT ${limit}`;
+  const rows = deckId
+    ? await db`
+        SELECT * FROM flashcards
+        WHERE user_id = ${userId} AND deck_id = ${deckId} AND due_at <= now()
+        ORDER BY due_at ASC
+        LIMIT ${limit}`
+    : await db`
+        SELECT * FROM flashcards
+        WHERE user_id = ${userId} AND due_at <= now()
+        ORDER BY due_at ASC
+        LIMIT ${limit}`;
   return { status: 200, body: camel(rows) };
 }
 

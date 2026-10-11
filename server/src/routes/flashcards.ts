@@ -34,14 +34,18 @@ async function ownDeck(deckId: string, userId: string): Promise<boolean> {
   return Boolean(rows[0]);
 }
 
-/** GET /due — cards due now, ordered by dueAt. ?limit= (default 50) */
+/** GET /due — cards due now, ordered by dueAt. ?limit= (default 50), ?deckId= for deck-scoped review */
 flashcardsRouter.get("/due", async (req, res) => {
   const userId = req.userId ?? "";
   const limit = Math.min(Math.max(parseInt(String(req.query.limit ?? "50"), 10) || 50, 1), 500);
+  // Fix 9: optional deckId filter for deck-scoped review.
+  const deckId = typeof req.query.deckId === "string" && req.query.deckId.length > 0 ? req.query.deckId : null;
+  const conditions = [eq(flashcards.userId, userId), lte(flashcards.dueAt, new Date())];
+  if (deckId) conditions.push(eq(flashcards.deckId, deckId));
   const rows = await db
     .select()
     .from(flashcards)
-    .where(and(eq(flashcards.userId, userId), lte(flashcards.dueAt, new Date())))
+    .where(and(...conditions))
     .orderBy(asc(flashcards.dueAt))
     .limit(limit);
   res.json({ cards: rows });
