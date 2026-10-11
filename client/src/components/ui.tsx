@@ -11,7 +11,7 @@ export function LoadingState({ label }: { label?: string }) {
   return (
     <div className="flex flex-col items-center justify-center gap-3 py-16">
       <GreyCreature size={72} />
-      <p className="font-display text-2xl font-extrabold uppercase tracking-wide text-ink/70">{label ?? "Loading…"}</p>
+      <p className="font-display text-2xl font-extrabold uppercase tracking-wide text-ink/70">{label ?? "One sec…"}</p>
     </div>
   );
 }
@@ -24,7 +24,7 @@ export function ErrorState({ message, onRetry, retryLabel }: { message?: string;
   return (
     <div className="flex flex-col items-center justify-center gap-3 py-16 text-center">
       <Creature kind="grey" size={72} className="animate-bob" />
-      <p className="font-display text-2xl font-extrabold uppercase tracking-wide text-ink/70">{message ?? "Something went wrong."}</p>
+      <p className="font-display text-2xl font-extrabold uppercase tracking-wide text-ink/70">{message ?? "Oops! Something went wrong. Try again!"}</p>
       {onRetry && (
         <button className="btn-pink btn-sm" onClick={onRetry}>
           {retryLabel ?? "Try again"}

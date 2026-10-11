@@ -4,7 +4,7 @@ import { Link, useNavigate, useParams } from "react-router-dom";
 import clsx from "clsx";
 import { api, ApiError, type Quiz } from "../lib/api";
 import { useLang } from "../lib/i18n";
-import { Button, Card, EmptyState, ErrorState, HangTag, LoadingState, PageBg } from "../components/ui";
+import { Button, Card, EmptyState, ErrorState, LoadingState, PageBg, Pill } from "../components/ui";
 
 function shuffle<T>(arr: T[]): T[] {
   const a = [...arr];
@@ -15,17 +15,13 @@ function shuffle<T>(arr: T[]): T[] {
   return a;
 }
 
-function formatTime(s: number): string {
-  const m = Math.floor(s / 60);
-  const r = s % 60;
-  return `${m}:${r.toString().padStart(2, "0")}`;
-}
-
+// One question at a time, big buttons. Timer runs silently in the background.
 export default function QuizTake() {
   const { id } = useParams<{ id: string }>();
   const { t } = useLang();
   const navigate = useNavigate();
   const [answers, setAnswers] = useState<Record<string, number>>({});
+  const [qi, setQi] = useState(0);
   const [secondsLeft, setSecondsLeft] = useState<number | null>(null);
   const [autoSubmitted, setAutoSubmitted] = useState(false);
 
@@ -52,6 +48,7 @@ export default function QuizTake() {
     },
   });
 
+  // Silent countdown — no timer shown, just auto-sends when time runs out.
   useEffect(() => {
     if (secondsLeft === null || secondsLeft <= 0) return;
     const timer = setTimeout(() => setSecondsLeft((s) => (s === null ? null : s - 1)), 1000);
@@ -72,57 +69,55 @@ export default function QuizTake() {
   if (!quizQ.data || questions.length === 0) return <EmptyState title={t("common.empty")} />;
 
   const quiz = quizQ.data;
-  const urgent = secondsLeft !== null && secondsLeft < 60;
+  const q = questions[qi]!;
+  const isLast = qi === questions.length - 1;
 
   return (
-    <div className="mx-auto max-w-3xl">
+    <div className="mx-auto max-w-2xl">
       <PageBg variant="night" />
-      <h1 className="title-chunky-light text-center">Focus</h1>
-      <div className="mb-4 mt-2 flex justify-center">
-        <HangTag color="bg-machinepurple" className="!text-base">
-          {quiz.title}
-        </HangTag>
+      <h1 className="title-chunky-light text-center">{quiz.title}</h1>
+
+      <div className="mb-6 mt-4 flex justify-center">
+        <Pill color="bg-machinepurple" className="!text-xl">
+          {qi + 1} {t("review.of")} {questions.length}
+        </Pill>
       </div>
 
-      {secondsLeft !== null && (
-        <div className="mb-6 flex justify-center">
-          <div className={clsx("paper-card mx-auto w-fit px-8 py-3 text-center", urgent && "!bg-btnpink")}>
-            <span className="font-display text-5xl font-extrabold">{formatTime(secondsLeft)}</span>
-          </div>
+      <Card>
+        <p className="font-display text-3xl font-extrabold leading-snug">{q.question}</p>
+        <div className="mt-6 space-y-3">
+          {q.options.map((opt, oi) => (
+            <button
+              key={oi}
+              onClick={() => setAnswers((a) => ({ ...a, [q.id]: oi }))}
+              className={clsx(
+                "btn-cream w-full !py-4 text-left !text-lg",
+                answers[q.id] === oi && "!bg-btnyellow",
+              )}
+            >
+              <span className="font-body text-base font-bold">{opt}</span>
+            </button>
+          ))}
         </div>
-      )}
-      {autoSubmitted && <p className="mb-4 text-center font-display text-2xl font-extrabold text-btnyellow">{t("quiz.autoSubmitted")}</p>}
+      </Card>
 
-      <div className="space-y-5">
-        {questions.map((q, qi) => (
-          <Card key={q.id}>
-            <p className="font-display text-2xl font-extrabold leading-snug">
-              {qi + 1}. {q.question}
-            </p>
-            <div className="mt-4 space-y-2.5">
-              {q.options.map((opt, oi) => (
-                <button
-                  key={oi}
-                  onClick={() => setAnswers((a) => ({ ...a, [q.id]: oi }))}
-                  className={clsx(
-                    "btn-cream btn-sm w-full text-left",
-                    answers[q.id] === oi && "!bg-btnyellow",
-                  )}
-                >
-                  <span className="font-body text-sm font-bold">{opt}</span>
-                </button>
-              ))}
-            </div>
-          </Card>
-        ))}
-      </div>
-
-      <div className="mt-8 flex flex-col gap-3 sm:flex-row">
-        <Button variant="blue" onClick={() => submitMut.mutate()} disabled={submitMut.isPending} className="flex-1">
-          {submitMut.isPending ? t("common.loading") : t("quiz.submit")}
-        </Button>
+      <div className="mt-6 flex flex-col gap-3">
+        {!isLast ? (
+          <Button variant="blue" onClick={() => setQi((i) => i + 1)} className="w-full !py-4 !text-2xl">
+            {t("btn.next")}
+          </Button>
+        ) : (
+          <Button
+            variant="green"
+            onClick={() => submitMut.mutate()}
+            disabled={submitMut.isPending}
+            className="w-full !py-4 !text-2xl"
+          >
+            {submitMut.isPending ? t("common.loading") : t("quiz.submit")}
+          </Button>
+        )}
         <Link to={`/decks/${quiz.deckId}`} className="btn-pink btn-sm text-center">
-          QUIT
+          {t("btn.cancel")}
         </Link>
       </div>
     </div>

@@ -21,6 +21,7 @@ import Explain from "./pages/Explain";
 import Chat from "./pages/Chat";
 import Bookmarks from "./pages/Bookmarks";
 import Admin from "./pages/Admin";
+import Me from "./pages/Me";
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -64,6 +65,7 @@ export default function App() {
                         <Route path="/chat" element={<Chat />} />
                         <Route path="/bookmarks" element={<Bookmarks />} />
                         <Route path="/admin" element={<Admin />} />
+                        <Route path="/me" element={<Me />} />
                         <Route path="*" element={<Navigate to="/" replace />} />
                       </Routes>
                     </Layout>

@@ -5,9 +5,7 @@ import { useLang } from "../lib/i18n";
 import { Button, Card, EmptyState, ErrorState, LoadingState, PageBg, PageHeader, Pill } from "../components/ui";
 import Creature, { type CreatureKind } from "../components/creatures";
 
-const GRADES = [1, 2, 3, 4] as const;
-const GRADE_VARIANTS = ["pink", "yellow", "blue", "green"] as const;
-
+// Two simple choices. NEED PRACTICE = grade 2, GOT IT! = grade 4.
 export default function Review() {
   const { t } = useLang();
   const queryClient = useQueryClient();
@@ -16,7 +14,7 @@ export default function Review() {
   const [flipped, setFlipped] = useState(false);
   const [reviewed, setReviewed] = useState(0);
   const [loaded, setLoaded] = useState(false);
-  const [lastGrade, setLastGrade] = useState<number | null>(null);
+  const [lastGotIt, setLastGotIt] = useState<boolean | null>(null);
 
   const dueQ = useQuery({ queryKey: ["due"], queryFn: () => api.get<Flashcard[]>("/flashcards/due") });
 
@@ -33,18 +31,11 @@ export default function Review() {
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ["due"] }),
   });
 
-  const gradeLabels: Record<number, string> = {
-    1: t("review.again"),
-    2: t("review.hard"),
-    3: t("review.good"),
-    4: t("review.easy"),
-  };
-
-  const handleGrade = (grade: number) => {
+  const handleGrade = (gotIt: boolean) => {
     const card = queue[index];
     if (!card) return;
-    gradeMut.mutate({ cardId: card.id, grade });
-    setLastGrade(grade);
+    gradeMut.mutate({ cardId: card.id, grade: gotIt ? 4 : 2 });
+    setLastGotIt(gotIt);
     setReviewed((r) => r + 1);
     setFlipped(false);
     setIndex((i) => i + 1);
@@ -57,8 +48,9 @@ export default function Review() {
   const done = loaded && index >= queue.length;
   const card = queue[index];
 
+  // Creature reacts: happy when they got it, sleepy-encouraging when they need practice.
   const mascot: CreatureKind =
-    done || lastGrade === null ? (done ? "dog" : "chick") : lastGrade >= 3 ? "dog" : "grey";
+    done || lastGotIt === null ? (done ? "dog" : "chick") : lastGotIt ? "dog" : "grey";
 
   return (
     <div className="mx-auto max-w-2xl">
@@ -66,11 +58,11 @@ export default function Review() {
       <PageHeader title={t("review.title")} />
 
       {!loaded || queue.length === 0 ? (
-        <EmptyState title={t("review.empty")} />
+        <EmptyState title={t("review.empty")} creature="dog" />
       ) : done ? (
         <Card className="washi relative text-center">
           <Creature kind="dog" size={104} className="mx-auto animate-bob" />
-          <h2 className="mt-3 font-display text-4xl font-extrabold uppercase">{t("review.done")}</h2>
+          <h2 className="mt-3 font-display text-4xl font-extrabold uppercase">{t("review.allDone")}</h2>
           <p className="mt-1 font-display text-2xl font-extrabold text-ink/60">
             {reviewed} {t("review.reviewed")}
           </p>
@@ -81,7 +73,7 @@ export default function Review() {
               setLoaded(false);
               setIndex(0);
               setReviewed(0);
-              setLastGrade(null);
+              setLastGotIt(null);
               dueQ.refetch();
             }}
           >
@@ -104,24 +96,28 @@ export default function Review() {
               <div className="flex min-h-[200px] flex-col items-center justify-center text-center">
                 <p className="font-display text-3xl font-extrabold leading-snug">{flipped ? card.back : card.front}</p>
                 {!flipped && (
-                  <Button variant="secondary" className="mt-6" onClick={(e) => { e.stopPropagation(); setFlipped(true); }}>
-                    {t("btn.flip")}
-                  </Button>
+                  <p className="mt-6 font-body text-sm font-bold text-ink/50">{t("review.tapToFlip")}</p>
                 )}
               </div>
             </div>
             {flipped && (
-              <div className="mt-5 grid grid-cols-2 gap-3 sm:grid-cols-4">
-                {GRADES.map((g, i) => (
-                  <Button
-                    key={g}
-                    variant={GRADE_VARIANTS[i]}
-                    onClick={() => handleGrade(g)}
-                    disabled={gradeMut.isPending}
-                  >
-                    {g}. {gradeLabels[g]}
-                  </Button>
-                ))}
+              <div className="mt-5 grid grid-cols-2 gap-4">
+                <Button
+                  variant="pink"
+                  onClick={() => handleGrade(false)}
+                  disabled={gradeMut.isPending}
+                  className="!py-5 !text-2xl"
+                >
+                  {t("review.needPractice")}
+                </Button>
+                <Button
+                  variant="green"
+                  onClick={() => handleGrade(true)}
+                  disabled={gradeMut.isPending}
+                  className="!py-5 !text-2xl"
+                >
+                  {t("review.gotIt")}
+                </Button>
               </div>
             )}
           </div>

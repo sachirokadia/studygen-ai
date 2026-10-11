@@ -179,7 +179,7 @@ export default function Notes() {
             <TextInput value={title} onChange={(e) => setTitle(e.target.value)} placeholder="Untitled" />
           </Field>
           <div className="mt-3">
-            <Field label={`${t("notes.content")} — use {{c1::answer}} for cloze cards`}>
+            <Field label={t("notes.clozeHint")}>
               <TextArea value={content} onChange={(e) => setContent(e.target.value)} rows={12} />
             </Field>
           </div>

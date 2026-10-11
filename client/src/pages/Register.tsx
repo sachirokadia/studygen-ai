@@ -19,6 +19,10 @@ export default function Register() {
   const onSubmit = async (e: FormEvent) => {
     e.preventDefault();
     setError("");
+    if (password.length < 8) {
+      setError(t("auth.passwordShort"));
+      return;
+    }
     setBusy(true);
     try {
       await register(name, email, password);
@@ -48,7 +52,8 @@ export default function Register() {
               <TextInput type="email" required value={email} onChange={(e) => setEmail(e.target.value)} placeholder="you@example.com" />
             </Field>
             <Field label={t("auth.password")}>
-              <TextInput type="password" required minLength={6} value={password} onChange={(e) => setPassword(e.target.value)} placeholder="••••••••" />
+              <TextInput type="password" required minLength={8} value={password} onChange={(e) => setPassword(e.target.value)} placeholder="••••••••" />
+              <p className="mt-1 font-body text-xs font-bold text-ink/50">{t("auth.passwordShort")}</p>
             </Field>
             {error && <p className="font-body text-sm font-bold text-red-600">{error}</p>}
             <Button variant="blue" type="submit" disabled={busy} className="w-full">
