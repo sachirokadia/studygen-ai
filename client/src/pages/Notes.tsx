@@ -1,7 +1,6 @@
 import { useEffect, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Pencil, Plus, Search, Sparkles, Trash2 } from "lucide-react";
-import clsx from "clsx";
 import { api, type Deck, type Note } from "../lib/api";
 import { useLang } from "../lib/i18n";
 import { Button, EmptyState, ErrorState, Field, LoadingState, Modal, PageBg, PageHeader, TextArea, TextInput } from "../components/ui";
@@ -112,10 +111,10 @@ export default function Notes() {
       <PageHeader
         title={t("nav.notes")}
         action={
-          <Button variant="yellow" onClick={() => openEditor(null)}>
+          <button onClick={() => openEditor(null)} className="btn-gradient btn-sm">
             <Plus className="h-4 w-4" strokeWidth={2.75} />
             {t("notes.new")}
-          </Button>
+          </button>
         }
       />
 
@@ -131,14 +130,11 @@ export default function Notes() {
       ) : notesQ.data && notesQ.data.length > 0 ? (
         <div className="board-brown p-4 md:p-6">
           <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
-            {notesQ.data.map((n, i) => (
+            {notesQ.data.map((n) => (
               <div
                 key={n.id}
                 onClick={() => openEditor(n)}
-                className={clsx(
-                  "paper-card washi relative cursor-pointer p-4 pt-5 transition hover:rotate-0",
-                  i % 2 === 0 ? "-rotate-1" : "rotate-1",
-                )}
+                className="paper-card relative cursor-pointer p-4 transition active:scale-[0.98]"
               >
                 <p className="truncate font-display text-xl font-extrabold uppercase leading-tight">{n.title}</p>
                 <p className="mt-1 line-clamp-3 font-body text-xs font-semibold text-ink/60">{n.content.slice(0, 120)}</p>
@@ -207,7 +203,7 @@ export default function Notes() {
           </div>
           {saveMut.isError && <p className="mt-2 font-body text-sm font-bold text-red-600">{t("common.error")}</p>}
 
-          <div className="mt-6 border-t-[3px] border-dashed border-ink/20 pt-4">
+          <div className="mt-6 border-t-2 border-dashed border-ink/10 pt-4">
             <p className="mb-2 font-display text-xl font-extrabold uppercase">
               <Sparkles className="mr-1 inline h-4 w-4" strokeWidth={2.75} />
               {t("notes.generateCards")} ({clozes.length})
@@ -229,7 +225,7 @@ export default function Notes() {
             ) : (
               <p className="font-body text-sm font-semibold text-ink/60">{t("notes.noDecks")}</p>
             )}
-            {genMsg && <p className="mt-2 font-display text-xl font-extrabold uppercase text-grassdark">{genMsg}</p>}
+            {genMsg && <p className="mt-2 font-display text-xl font-extrabold uppercase text-playgreendark">{genMsg}</p>}
           </div>
         </Modal>
       )}

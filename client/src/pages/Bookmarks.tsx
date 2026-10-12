@@ -29,7 +29,7 @@ export default function Bookmarks() {
         <div className="board-brown p-4 md:p-6">
           <div className="grid gap-5 sm:grid-cols-2">
             {bmQ.data.map((b) => (
-              <div key={b.id} className="paper-card washi relative p-4 pt-5">
+              <div key={b.id} className="paper-card relative p-4">
                 <div className="flex items-center gap-2">
                   <Bookmark className="h-5 w-5 shrink-0" strokeWidth={2.75} />
                   <p className="truncate font-display text-lg font-extrabold uppercase leading-tight">{b.label}</p>

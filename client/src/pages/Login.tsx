@@ -3,7 +3,7 @@ import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "../lib/auth";
 import { useLang } from "../lib/i18n";
 import { ApiError } from "../lib/api";
-import { Button, Field, PageBg, TextInput } from "../components/ui";
+import { Field, PageBg, TextInput } from "../components/ui";
 import Creature from "../components/creatures";
 
 export default function Login() {
@@ -33,7 +33,7 @@ export default function Login() {
     <>
       <PageBg variant="sky" />
       <div className="flex min-h-screen items-center justify-center px-4 py-8">
-        <div className="paper-card washi relative mx-auto w-full max-w-md p-6 md:p-8">
+        <div className="paper-card relative mx-auto w-full max-w-md p-6 md:p-8">
           <div className="mb-6 flex flex-col items-center text-center">
             <Creature kind="chick" size={104} className="animate-bob" />
             <h1 className="title-chunky mt-2 text-center">StudyGen AI</h1>
@@ -47,19 +47,19 @@ export default function Login() {
               <TextInput type="password" required value={password} onChange={(e) => setPassword(e.target.value)} placeholder="••••••••" />
             </Field>
             {error && <p className="font-body text-sm font-bold text-red-600">{error}</p>}
-            <Button variant="blue" type="submit" disabled={busy} className="w-full">
+            <button type="submit" disabled={busy} className="btn-gradient w-full">
               {busy ? t("common.loading") : t("btn.login")}
-            </Button>
+            </button>
           </form>
           <p className="mt-4 text-center">
-            <Link to="/register" className="font-display text-lg font-extrabold text-ink underline decoration-btnyellow decoration-[3px] underline-offset-4">
+            <Link to="/register" className="font-display text-lg font-extrabold text-playpurple">
               {t("auth.noAccount")}
             </Link>
           </p>
         </div>
 
         {/* Fix 6: public landing — what StudyGen AI does, before the login wall. */}
-        <div className="paper-card washi relative mx-auto mt-6 w-full max-w-md p-6 text-center">
+        <div className="paper-card relative mx-auto mt-6 w-full max-w-md p-6 text-center">
           <h2 className="font-display text-3xl font-extrabold uppercase leading-tight">
             {t("landing.headline")}
           </h2>
@@ -77,7 +77,7 @@ export default function Login() {
               <span className="font-body text-sm font-bold text-ink/80">{t("landing.point3")}</span>
             </li>
           </ul>
-          <Link to="/register" className="btn-green mt-5 inline-flex w-full !py-4 !text-2xl">
+          <Link to="/register" className="btn-gradient mt-5 inline-flex w-full !py-4 !text-2xl">
             {t("landing.getStarted")}
           </Link>
         </div>

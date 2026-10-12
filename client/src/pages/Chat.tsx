@@ -4,7 +4,7 @@ import { Send } from "lucide-react";
 import clsx from "clsx";
 import { api, ApiError, type ChatMsg, type Deck } from "../lib/api";
 import { useLang } from "../lib/i18n";
-import { AiNotice, Button, Card, EmptyState, ErrorState, HangTag, PageBg, Spinner, TextInput } from "../components/ui";
+import { AiNotice, Button, Card, EmptyState, ErrorState, PageBg, Spinner, TextInput } from "../components/ui";
 import Creature, { OrangeBlob } from "../components/creatures";
 import { Markdown } from "./Explain";
 
@@ -53,11 +53,11 @@ export default function Chat() {
             <h1 className="title-chunky">{t("chat.title")}</h1>
           </div>
           {decksQ.data ? (
-            <HangTag color="bg-sky">
+            <span className="date-tag">
               <select
                 value={deckId}
                 onChange={(e) => setDeckId(e.target.value)}
-                className="bg-transparent font-display text-lg font-extrabold uppercase outline-none"
+                className="bg-transparent font-display text-lg font-extrabold outline-none"
                 aria-label={t("chat.selectDeck")}
               >
                 <option value="">{t("chat.selectDeck")}</option>
@@ -67,7 +67,7 @@ export default function Chat() {
                   </option>
                 ))}
               </select>
-            </HangTag>
+            </span>
           ) : undefined}
         </div>
 
@@ -86,7 +86,7 @@ export default function Chat() {
                     </div>
                   </div>
                 ) : (
-                  <div className="paper-card !bg-sky/40 ml-auto max-w-[80%] p-3">
+                  <div className="paper-card !bg-ice ml-auto max-w-[80%] p-3">
                     <p className="font-body text-sm font-semibold text-ink">{m.content}</p>
                   </div>
                 )}
@@ -105,7 +105,7 @@ export default function Chat() {
             <div ref={bottomRef} />
           </div>
 
-          <div className="border-t-[3px] border-dashed border-ink/30 p-3">
+          <div className="border-t-2 border-dashed border-ink/10 p-3">
             {aiMissing && (
               <div className="mb-3">
                 <AiNotice message={t("common.aiNotConfigured")} />

@@ -52,15 +52,15 @@ export default function Admin() {
         ) : statsQ.data ? (
           <>
             <div className="flex flex-wrap gap-3">
-              <Pill color="bg-btnyellow" className="!py-1.5 !text-lg">
+              <Pill color="bg-butter" className="!py-1.5 !text-lg">
                 <Users className="h-5 w-5" strokeWidth={2.75} />
                 {t("admin.users")}: {statsQ.data.users}
               </Pill>
-              <Pill color="bg-sky" className="!py-1.5 !text-lg">
+              <Pill color="bg-ice" className="!py-1.5 !text-lg">
                 <Layers className="h-5 w-5" strokeWidth={2.75} />
                 {t("admin.decksCount")}: {statsQ.data.decks}
               </Pill>
-              <Pill color="bg-btnpink" className="!py-1.5 !text-lg">
+              <Pill color="bg-blush" className="!py-1.5 !text-lg">
                 <StickyNote className="h-5 w-5" strokeWidth={2.75} />
                 {t("admin.cardsCount")}: {statsQ.data.cards}
               </Pill>
@@ -98,7 +98,7 @@ export default function Admin() {
                         </p>
                         <p className="truncate font-body text-xs font-bold text-ink/60">{u.email}</p>
                       </div>
-                      <Pill color={isAdmin ? "bg-btnyellow" : "bg-paper"} className="!text-xs">
+                      <Pill color={isAdmin ? "bg-butter" : "bg-white"} className="!text-xs">
                         <ShieldCheck className="h-4 w-4" strokeWidth={2.75} />
                         {u.role}
                       </Pill>

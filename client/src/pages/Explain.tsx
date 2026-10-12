@@ -4,7 +4,7 @@ import { Sparkles } from "lucide-react";
 import clsx from "clsx";
 import { api, ApiError } from "../lib/api";
 import { useLang } from "../lib/i18n";
-import { AiNotice, Button, Field, HangTag, PageBg, TextInput } from "../components/ui";
+import { AiNotice, Field, PageBg, TextInput } from "../components/ui";
 import Creature from "../components/creatures";
 
 type Level = "eli5" | "simple" | "detailed";
@@ -105,7 +105,7 @@ export function Markdown({ text }: { text: string }) {
   return <div>{renderMarkdown(text)}</div>;
 }
 
-const LEVEL_COLORS: Record<Level, string> = { eli5: "bg-sunny", simple: "bg-sky", detailed: "bg-blush" };
+const LEVEL_COLORS: Record<Level, string> = { eli5: "bg-butter", simple: "bg-ice", detailed: "bg-blush" };
 
 export default function Explain() {
   const { t } = useLang();
@@ -129,7 +129,7 @@ export default function Explain() {
   return (
     <div>
       <PageBg variant="sky" />
-      <div className="paper-card washi relative mx-auto max-w-2xl p-6 pt-7">
+      <div className="paper-card relative mx-auto max-w-2xl p-6">
         <div className="mb-4 flex items-center gap-4">
           <Creature kind="chick" size={88} className="animate-bob" />
           <h1 className="title-chunky">{t("explain.title")}</h1>
@@ -149,7 +149,7 @@ export default function Explain() {
                   className={clsx(
                     "pill cursor-pointer transition",
                     LEVEL_COLORS[l.id],
-                    level === l.id ? "shadow-chunky" : "opacity-70 hover:opacity-100",
+                    level === l.id ? "ring-[3px] ring-playpink/40" : "opacity-60 hover:opacity-100",
                   )}
                 >
                   {l.label}
@@ -157,15 +157,14 @@ export default function Explain() {
               ))}
             </div>
           </Field>
-          <Button
-            variant="blue"
+          <button
             onClick={() => { setAiMissing(false); explainMut.mutate(); }}
             disabled={explainMut.isPending || !topic.trim()}
-            className="w-full"
+            className="btn-gradient w-full"
           >
             <Sparkles className="h-4 w-4" strokeWidth={2.75} />
             {explainMut.isPending ? t("common.loading") : t("explain.explainBtn")}
-          </Button>
+          </button>
           {aiMissing && (
             <div className="mt-4">
               <AiNotice message={t("common.aiNotConfigured")} />
@@ -176,11 +175,11 @@ export default function Explain() {
       </div>
 
       {explainMut.data && (
-        <div className="paper-card washi relative mx-auto mt-6 max-h-[60vh] max-w-2xl overflow-y-auto p-6 pt-7">
+        <div className="paper-card relative mx-auto mt-6 max-h-[60vh] max-w-2xl overflow-y-auto p-6">
           <div className="mb-3 flex flex-wrap items-center gap-2">
-            <HangTag color={LEVEL_COLORS[level]}>
+            <span className={clsx("pill", LEVEL_COLORS[level])}>
               {levels.find((l) => l.id === level)?.label}
-            </HangTag>
+            </span>
             <span className="font-display text-xl font-extrabold uppercase text-ink/60">{topic.trim()}</span>
           </div>
           <Markdown text={explainMut.data.explanation} />

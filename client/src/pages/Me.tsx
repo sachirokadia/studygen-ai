@@ -12,12 +12,12 @@ export default function Me() {
   const navigate = useNavigate();
 
   const rows = [
-    { to: "/notes", label: t("nav.notes"), icon: StickyNote, color: "bg-btnpink" },
-    { to: "/paths", label: t("nav.paths"), icon: Map, color: "bg-machinepurple" },
-    { to: "/focus", label: t("me.focus"), icon: Timer, color: "bg-sky" },
-    { to: "/explain", label: t("nav.explain"), icon: Sparkles, color: "bg-btnyellow" },
-    { to: "/chat", label: t("nav.chat"), icon: MessageCircle, color: "bg-grass" },
-    { to: "/bookmarks", label: t("nav.bookmarks"), icon: Bookmark, color: "bg-btnpink" },
+    { to: "/notes", label: t("nav.notes"), icon: StickyNote, color: "bg-playpink" },
+    { to: "/paths", label: t("nav.paths"), icon: Map, color: "bg-playpurple" },
+    { to: "/focus", label: t("me.focus"), icon: Timer, color: "bg-playblue" },
+    { to: "/explain", label: t("nav.explain"), icon: Sparkles, color: "bg-playyellow" },
+    { to: "/chat", label: t("nav.chat"), icon: MessageCircle, color: "bg-playgreen" },
+    { to: "/bookmarks", label: t("nav.bookmarks"), icon: Bookmark, color: "bg-playorange" },
   ];
 
   const handleLogout = () => {
@@ -30,7 +30,7 @@ export default function Me() {
   return (
     <div>
       <PageBg variant="sky" />
-      <div className="paper-card washi relative mx-auto max-w-md p-6 pt-8">
+      <div className="paper-card relative mx-auto max-w-md p-6 pt-8">
         <div className="mb-6 flex flex-col items-center text-center">
           <Creature kind="dog" size={96} className="animate-bob" />
           <h1 className="title-chunky mt-2">{user?.name ?? t("nav.me")}</h1>
@@ -39,33 +39,41 @@ export default function Me() {
 
         <div className="space-y-3">
           {rows.map((r) => (
-            <Link key={r.to} to={r.to} className={clsx("nav-tag w-full !justify-start !p-4 !text-xl", r.color)}>
-              <r.icon className="h-6 w-6" strokeWidth={2.75} />
-              {r.label}
+            <Link
+              key={r.to}
+              to={r.to}
+              className="paper-card flex items-center gap-3 !p-4 transition active:scale-[0.98]"
+            >
+              <span className={clsx("flex h-11 w-11 shrink-0 items-center justify-center rounded-full text-white", r.color)}>
+                <r.icon className="h-5 w-5" strokeWidth={2.75} />
+              </span>
+              <span className="font-display text-xl font-extrabold">{r.label}</span>
             </Link>
           ))}
           {user?.role === "admin" && (
-            <Link to="/admin" className="nav-tag w-full !justify-start !p-4 !text-xl bg-paper">
-              <ShieldCheck className="h-6 w-6" strokeWidth={2.75} />
-              {t("nav.admin")}
+            <Link to="/admin" className="paper-card flex items-center gap-3 !p-4 transition active:scale-[0.98]">
+              <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-ink text-white">
+                <ShieldCheck className="h-5 w-5" strokeWidth={2.75} />
+              </span>
+              <span className="font-display text-xl font-extrabold">{t("nav.admin")}</span>
             </Link>
           )}
         </div>
 
-        <div className="mt-6 border-t-[3px] border-dashed border-ink/20 pt-4">
+        <div className="mt-6 border-t-2 border-dashed border-ink/10 pt-4">
           <p className="mb-2 text-center font-display text-lg font-extrabold uppercase text-ink/60">
             {t("me.language")}
           </p>
           <div className="flex justify-center gap-2">
             <button
               onClick={() => switchLang("en")}
-              className={clsx("pill cursor-pointer", lang === "en" ? "shadow-chunky" : "opacity-60")}
+              className={clsx("pill cursor-pointer", lang === "en" ? "!bg-playyellow" : "opacity-60")}
             >
               English
             </button>
             <button
               onClick={() => switchLang("hi")}
-              className={clsx("pill cursor-pointer", lang === "hi" ? "shadow-chunky" : "opacity-60")}
+              className={clsx("pill cursor-pointer", lang === "hi" ? "!bg-playyellow" : "opacity-60")}
             >
               हिंदी
             </button>

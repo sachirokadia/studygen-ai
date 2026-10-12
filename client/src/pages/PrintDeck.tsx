@@ -32,7 +32,7 @@ export default function PrintDeck() {
   const { deck, flashcards } = detailQ.data;
 
   return (
-    <div className="min-h-screen bg-paper p-6">
+    <div className="min-h-screen bg-cream p-6">
       <div className="no-print mx-auto mb-6 flex max-w-3xl flex-wrap items-center gap-3">
         <Link to={`/decks/${id}`} className="btn-yellow btn-sm">
           <ArrowLeft className="h-4 w-4" strokeWidth={2.75} />

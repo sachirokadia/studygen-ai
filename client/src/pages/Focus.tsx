@@ -72,7 +72,7 @@ export default function Focus() {
         <h1 className="title-chunky-light">{t("focus.title")}</h1>
 
         {done ? (
-          <div className="paper-card washi relative mt-8 p-8">
+          <div className="paper-card relative mt-8 p-8">
             <Creature kind="dog" size={120} className="mx-auto animate-bob" />
             <p className="mt-4 font-display text-4xl font-extrabold uppercase">{t("focus.done")}</p>
             <p className="mt-2 font-display text-3xl font-extrabold text-ink/70">
@@ -84,12 +84,9 @@ export default function Focus() {
           </div>
         ) : (
           <>
-            {/* Hanging timer tag */}
-            <div className="relative mx-auto mt-10 w-fit">
-              <div className="absolute -top-8 left-1/2 h-8 w-[3px] -translate-x-1/2 bg-ink/60" />
-              <div className="paper-card !px-10 !py-6">
-                <p className="font-display text-7xl font-extrabold tabular-nums">{fmt(left)}</p>
-              </div>
+            {/* Timer card */}
+            <div className="paper-card mx-auto mt-10 w-fit !px-10 !py-6">
+              <p className="font-display text-7xl font-extrabold tabular-nums">{fmt(left)}</p>
             </div>
 
             <p className="mt-8 font-display text-xl font-extrabold uppercase text-paper/80">
@@ -103,7 +100,7 @@ export default function Focus() {
                   disabled={running}
                   className={clsx(
                     "pill !px-5 !py-2 !text-xl",
-                    minutes === p ? "bg-btnyellow shadow-chunky" : "bg-paper opacity-70",
+                    minutes === p ? "!bg-playyellow" : "bg-white/70",
                   )}
                 >
                   {p} {t("focus.minutes")}
@@ -113,10 +110,10 @@ export default function Focus() {
 
             <div className="mt-8 flex justify-center gap-4">
               {!running ? (
-                <Button variant="green" onClick={start} className="!px-10 !py-4 !text-2xl">
+                <button onClick={start} className="btn-gradient !px-10 !py-4 !text-2xl">
                   <Play className="h-6 w-6" strokeWidth={2.75} />
                   {t("focus.start")}
-                </Button>
+                </button>
               ) : (
                 <Button variant="yellow" onClick={pause} className="!px-10 !py-4 !text-2xl">
                   <Pause className="h-6 w-6" strokeWidth={2.75} />

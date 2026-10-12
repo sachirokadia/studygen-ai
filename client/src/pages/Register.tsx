@@ -3,7 +3,7 @@ import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "../lib/auth";
 import { useLang } from "../lib/i18n";
 import { ApiError } from "../lib/api";
-import { Button, Field, PageBg, TextInput } from "../components/ui";
+import { Field, PageBg, TextInput } from "../components/ui";
 import Creature from "../components/creatures";
 
 export default function Register() {
@@ -38,7 +38,7 @@ export default function Register() {
     <>
       <PageBg variant="sky" />
       <div className="flex min-h-screen items-center justify-center px-4 py-8">
-        <div className="paper-card washi relative mx-auto w-full max-w-md p-6 md:p-8">
+        <div className="paper-card relative mx-auto w-full max-w-md p-6 md:p-8">
           <div className="mb-6 flex flex-col items-center text-center">
             <Creature kind="chick" size={104} className="animate-bob" />
             <h1 className="title-chunky mt-2 text-center">StudyGen AI</h1>
@@ -56,12 +56,12 @@ export default function Register() {
               <p className="mt-1 font-body text-xs font-bold text-ink/50">{t("auth.passwordShort")}</p>
             </Field>
             {error && <p className="font-body text-sm font-bold text-red-600">{error}</p>}
-            <Button variant="blue" type="submit" disabled={busy} className="w-full">
+            <button type="submit" disabled={busy} className="btn-gradient w-full">
               {busy ? t("common.loading") : t("btn.register")}
-            </Button>
+            </button>
           </form>
           <p className="mt-4 text-center">
-            <Link to="/login" className="font-display text-lg font-extrabold text-ink underline decoration-btnyellow decoration-[3px] underline-offset-4">
+            <Link to="/login" className="font-display text-lg font-extrabold text-playpurple">
               {t("auth.haveAccount")}
             </Link>
           </p>

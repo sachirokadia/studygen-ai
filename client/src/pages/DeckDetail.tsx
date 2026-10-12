@@ -83,7 +83,7 @@ export default function DeckDetail() {
   return (
     <div>
       <PageBg variant="sky" />
-      <div className="paper-card washi relative mx-auto max-w-3xl p-6">
+      <div className="paper-card relative mx-auto max-w-3xl p-6">
         <PageHeader
           title={deck.title}
           action={
@@ -116,7 +116,7 @@ export default function DeckDetail() {
           </Pill>
         </div>
 
-        <Link to={`/review?deckId=${deck.id}`} className="btn-blue mb-8 inline-flex w-full !py-4 !text-2xl">
+        <Link to={`/review?deckId=${deck.id}`} className="btn-gradient mb-8 inline-flex w-full !py-4 !text-2xl">
           <Play className="h-5 w-5" strokeWidth={2.75} />
           {t("deck.studyPack")}
         </Link>
@@ -206,10 +206,10 @@ export default function DeckDetail() {
             <EmptyState title={t("common.empty")} />
           ) : (
             <div className="space-y-3">
-              {flashcards.map((c, i) => (
+              {flashcards.map((c) => (
                 <div
                   key={c.id}
-                  className={`paper-card !p-4 ${i % 2 === 0 ? "-rotate-1" : "rotate-1"}`}
+                  className="paper-card !p-4"
                 >
                   <p className="font-display text-xl font-extrabold leading-snug">
                     {hasCloze(c.front) ? <ClozeText text={c.front} revealed={false} /> : c.front}

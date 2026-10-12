@@ -39,10 +39,10 @@ export default function Paths() {
       <PageHeader
         title={t("nav.paths")}
         action={
-          <Button variant="yellow" onClick={() => setModalOpen(true)}>
+          <button onClick={() => setModalOpen(true)} className="btn-gradient btn-sm">
             <Plus className="h-4 w-4" strokeWidth={2.75} />
             {t("paths.new")}
-          </Button>
+          </button>
         }
       />
 
@@ -57,7 +57,7 @@ export default function Paths() {
               const total = p.topics?.length ?? 0;
               const done = p.topics?.filter((x) => x.status === "done").length ?? 0;
               return (
-                <div key={p.id} className="paper-card washi relative p-4 pt-5">
+                <div key={p.id} className="paper-card relative p-4">
                   <div className="mb-2 flex items-center gap-3">
                     <Creature kind={KIND_CYCLE[idx % KIND_CYCLE.length]} size={56} className="animate-bob" />
                     <Link to={`/paths/${p.id}`}>
@@ -69,7 +69,7 @@ export default function Paths() {
                   )}
                   <div className="mt-3 flex flex-wrap items-center gap-2">
                     {total > 0 && (
-                      <Pill color={done === total ? "bg-grass" : "bg-btnyellow"}>
+                      <Pill color={done === total ? "bg-mint" : "bg-butter"}>
                         {done}/{total} {t("paths.done")}
                       </Pill>
                     )}
@@ -101,10 +101,10 @@ export default function Paths() {
         <EmptyState
           title={t("paths.empty")}
           action={
-            <Button variant="yellow" onClick={() => setModalOpen(true)}>
+            <button onClick={() => setModalOpen(true)} className="btn-gradient btn-sm">
               <Plus className="h-4 w-4" strokeWidth={2.75} />
               {t("paths.new")}
-            </Button>
+            </button>
           }
         />
       )}
@@ -118,9 +118,9 @@ export default function Paths() {
             <Field label={t("paths.topicDesc")}>
               <TextArea value={description} onChange={(e) => setDescription(e.target.value)} rows={3} />
             </Field>
-            <Button variant="blue" onClick={() => createMut.mutate()} disabled={createMut.isPending || !title.trim()} className="w-full">
+            <button onClick={() => createMut.mutate()} disabled={createMut.isPending || !title.trim()} className="btn-gradient w-full">
               {createMut.isPending ? t("common.loading") : t("btn.create")}
-            </Button>
+            </button>
             {createMut.isError && <p className="font-body text-sm font-bold text-red-700">{t("common.error")}</p>}
           </div>
         </Modal>

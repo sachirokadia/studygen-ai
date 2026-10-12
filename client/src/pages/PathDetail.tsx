@@ -11,9 +11,9 @@ import Creature from "../components/creatures";
 const STATUS_CYCLE: Record<TopicStatus, TopicStatus> = { todo: "doing", doing: "done", done: "todo" };
 
 const STATUS_META: Record<TopicStatus, { icon: typeof Circle; nodeBg: string; key: "paths.todo" | "paths.doing" | "paths.done" }> = {
-  todo: { icon: Circle, nodeBg: "bg-paper", key: "paths.todo" },
-  doing: { icon: Loader, nodeBg: "bg-sunny", key: "paths.doing" },
-  done: { icon: CheckCircle2, nodeBg: "bg-grass", key: "paths.done" },
+  todo: { icon: Circle, nodeBg: "bg-white", key: "paths.todo" },
+  doing: { icon: Loader, nodeBg: "bg-butter", key: "paths.doing" },
+  done: { icon: CheckCircle2, nodeBg: "bg-mint", key: "paths.done" },
 };
 
 export default function PathDetail() {
@@ -57,7 +57,7 @@ export default function PathDetail() {
   return (
     <div>
       <PageBg variant="sky" />
-      <div className="paper-card washi relative mx-auto max-w-3xl p-6 pt-7">
+      <div className="paper-card relative mx-auto max-w-3xl p-6">
         <Link to="/paths" className="mb-4 inline-flex items-center gap-1 font-display text-lg font-extrabold uppercase text-ink/60 hover:text-ink">
           <ArrowLeft className="h-5 w-5" strokeWidth={2.75} />
           {t("btn.back")}
@@ -73,7 +73,7 @@ export default function PathDetail() {
         />
         {topics.length > 0 && (
           <div className="mb-4">
-            <Pill color={complete ? "bg-grass" : "bg-btnyellow"}>
+            <Pill color={complete ? "bg-mint" : "bg-butter"}>
               {doneCount}/{topics.length} {t("paths.done")} · {pct}%
             </Pill>
           </div>
@@ -81,7 +81,7 @@ export default function PathDetail() {
         {path.description && <p className="mb-4 font-body text-sm font-semibold text-ink/60">{path.description}</p>}
 
         {complete && (
-          <div className="paper-card washi relative mb-6 flex items-center gap-4 !bg-grass/30 p-4">
+          <div className="paper-card relative mb-6 flex items-center gap-4 !bg-mint/60 p-4">
             <Creature kind="dog" size={72} className="animate-bob" />
             <p className="font-display text-3xl font-extrabold uppercase">{t("paths.done")}!</p>
           </div>
@@ -98,7 +98,7 @@ export default function PathDetail() {
             }
           />
         ) : (
-          <div className="relative ml-5 border-l-4 border-dotted border-ink/40 pl-8">
+          <div className="relative ml-5 border-l-4 border-dotted border-ink/15 pl-8">
             {topics.map((topic, i) => {
               const meta = STATUS_META[topic.status];
               const Icon = meta.icon;
@@ -107,9 +107,10 @@ export default function PathDetail() {
                   <button
                     onClick={() => statusMut.mutate({ topicId: topic.id, status: STATUS_CYCLE[topic.status] })}
                     className={clsx(
-                      "absolute -left-[3.35rem] top-3 flex h-10 w-10 items-center justify-center rounded-full border-[3px] border-ink shadow-chunkySm transition hover:scale-110",
+                      "absolute -left-[3.35rem] top-3 flex h-10 w-10 items-center justify-center rounded-full transition hover:scale-110",
                       meta.nodeBg,
                     )}
+                    style={{ boxShadow: "0 8px 18px -8px rgba(90,70,130,0.35)" }}
                     title={t(meta.key)}
                     aria-label={`Mark as ${STATUS_CYCLE[topic.status]}`}
                   >
@@ -117,7 +118,7 @@ export default function PathDetail() {
                   </button>
                   <div className="paper-card p-4">
                     <div className="flex items-center gap-2">
-                      <Pill color="bg-btnyellow">{i + 1}</Pill>
+                      <Pill color="bg-butter">{i + 1}</Pill>
                       <p className={clsx("flex-1 font-body font-bold text-ink", topic.status === "done" && "text-ink/40 line-through")}>
                         {topic.title}
                       </p>
