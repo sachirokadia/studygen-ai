@@ -2,7 +2,7 @@ import { useQuery } from "@tanstack/react-query";
 import { apiFetch } from "../lib/api";
 import { useLang } from "../lib/i18n";
 
-/** Small yellow paper-tag warning shown when the API runs without a database. */
+/** Small soft warning pill shown when the API runs without a database. */
 export default function DemoBanner() {
   const { t } = useLang();
   const { data } = useQuery({
@@ -16,8 +16,8 @@ export default function DemoBanner() {
 
   return (
     <div className="mb-4 flex justify-center">
-      <span className="pill !bg-btnyellow text-center text-sm normal-case">
-        <span className="font-body font-bold">{t("demo.playMode")}</span>
+      <span className="inline-flex items-center gap-1.5 rounded-full bg-sun px-4 py-1.5 text-center text-xs font-bold text-ink shadow-card">
+        {t("demo.playMode")}
       </span>
     </div>
   );

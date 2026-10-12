@@ -4,7 +4,7 @@ import { useQuery } from "@tanstack/react-query";
 import clsx from "clsx";
 import { api, type Quiz, type QuizAttempt } from "../lib/api";
 import { useLang } from "../lib/i18n";
-import { EmptyState, ErrorState, LoadingState, PageBg } from "../components/ui";
+import { Button, EmptyState, ErrorState, LoadingState, PageBg } from "../components/ui";
 import Creature from "../components/creatures";
 
 function Stars({ pct }: { pct: number }) {
@@ -14,8 +14,8 @@ function Stars({ pct }: { pct: number }) {
       {[1, 2, 3].map((i) => (
         <span
           key={i}
-          className="font-display text-5xl"
-          style={{ color: i <= n ? "#FFD54F" : "#2B2B2B33", textShadow: "2px 2px 0 #2B2B2B" }}
+          className="text-5xl font-extrabold"
+          style={{ color: i <= n ? "#FFA31A" : "#1111111A", textShadow: "0 3px 10px rgba(255,163,26,0.35)" }}
         >
           ★
         </span>
@@ -62,31 +62,40 @@ export default function QuizReview() {
   return (
     <div className="mx-auto max-w-xl">
       <PageBg variant="night" />
-      <div className="paper-card washi animate-pop-in relative mt-8 !rounded-[28px] p-8 text-center">
-        <Creature kind={pct >= 50 ? "dog" : "grey"} size={120} className="mx-auto animate-bob" />
-        <h2 className="mt-3 font-display text-4xl font-extrabold">{t("review.allDone")}</h2>
+      <div className="card animate-fade-up relative mt-8 !rounded-[28px] p-8 text-center">
+        <div className="absolute inset-x-8 top-4 flex justify-between" aria-hidden="true">
+          <Creature kind="chick" size={44} className="animate-float" />
+          <Creature kind="orange" size={52} className="animate-float" />
+        </div>
+        <Creature kind={pct >= 50 ? "dog" : "grey"} size={120} className="mx-auto animate-float" />
+        <h2 className="mt-3 text-4xl font-extrabold tracking-tight text-ink">{t("review.allDone")}</h2>
         <Stars pct={pct} />
-        <p className="mt-4 font-display text-xl font-extrabold text-ink/60">{t("quiz.score")}</p>
-        <p className="mt-1 font-display text-6xl font-extrabold">
+        <p className="mt-4 text-xl font-extrabold text-ink/60">{t("quiz.score")}</p>
+        <p
+          className="mt-1 bg-clip-text text-6xl font-extrabold text-transparent"
+          style={{ backgroundImage: "linear-gradient(135deg, #FFA94D 0%, #FF5FA2 100%)" }}
+        >
           {attempt.score} {t("quiz.outOf")} {attempt.total}!
         </p>
 
         {questions.length > 0 && (
           <button
             onClick={() => setShowAnswers((s) => !s)}
-            className="mt-4 font-display text-lg font-extrabold text-ink/60 underline decoration-btnyellow decoration-[3px] underline-offset-4"
+            className="mt-4 text-lg font-extrabold text-ink/60 underline decoration-tangerine decoration-[3px] underline-offset-4"
           >
             {showAnswers ? t("quiz.hideAnswers") : t("quiz.seeAnswers")} {showAnswers ? "▲" : "▼"}
           </button>
         )}
 
         <Link to={`/quiz/${id}`} className="mt-6 block">
-          <button className="btn-gradient w-full !py-4 !text-2xl">
+          <Button variant="accent" className="w-full !py-4 !text-2xl">
             {t("quiz.practiceAgain")}
-          </button>
+          </Button>
         </Link>
-        <Link to={`/decks/${quiz.deckId}`} className="btn-cream btn-sm mt-3 inline-block">
-          {t("btn.back")}
+        <Link to={`/decks/${quiz.deckId}`} className="mt-3 block">
+          <Button variant="soft" className="btn-sm w-full !text-lg">
+            {t("btn.back")}
+          </Button>
         </Link>
       </div>
 
@@ -96,8 +105,8 @@ export default function QuizReview() {
             const picked = answerByQid.get(q.id);
             const correct = picked === q.correctIndex;
             return (
-              <div key={q.id} className="paper-card !p-5">
-                <p className="font-display text-xl font-extrabold leading-snug">
+              <div key={q.id} className="card !p-5">
+                <p className="text-xl font-extrabold leading-snug tracking-tight text-ink">
                   {i + 1}. {q.question}
                 </p>
                 <div className="mt-3 space-y-2">
@@ -108,12 +117,12 @@ export default function QuizReview() {
                       <div
                         key={oi}
                         className={clsx(
-                          "rounded-xl border-[3px] px-3 py-2 font-body text-sm font-bold",
+                          "rounded-xl border-2 px-3 py-2 text-sm font-bold text-ink",
                           isRight
-                            ? "border-ink bg-grass/40"
+                            ? "border-mint bg-mint/50"
                             : isPicked
-                              ? "border-ink bg-btnpink/40"
-                              : "border-ink/20 bg-paper",
+                              ? "border-berry/40 bg-berry/10"
+                              : "border-[#ECECF1] bg-paper",
                         )}
                       >
                         {opt}
@@ -126,12 +135,12 @@ export default function QuizReview() {
                   })}
                 </div>
                 {!correct && picked !== undefined && (
-                  <p className="mt-2 font-body text-sm font-bold text-ink/60">
+                  <p className="mt-2 text-sm font-bold text-ink/60">
                     {t("quiz.youPicked")}: {q.options[picked] ?? "—"}
                   </p>
                 )}
                 {q.explanation && (
-                  <p className="mt-3 border-t-[3px] border-dashed border-ink/20 pt-2 font-body text-sm font-semibold text-ink/70">
+                  <p className="mt-3 border-t-2 border-dashed border-[#ECECF1] pt-2 text-sm font-semibold text-ink/70">
                     <span className="font-extrabold">{t("quiz.explanation")}: </span>
                     {q.explanation}
                   </p>

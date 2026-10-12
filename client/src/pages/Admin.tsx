@@ -1,9 +1,12 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Layers, ShieldCheck, StickyNote, Users } from "lucide-react";
+import clsx from "clsx";
 import { api, type AdminStats, type AdminUser } from "../lib/api";
 import { useAuth } from "../lib/auth";
 import { useLang } from "../lib/i18n";
-import { Button, EmptyState, ErrorState, LoadingState, PageBg, Pill } from "../components/ui";
+import { Button, EmptyState, ErrorState, LoadingState, PageBg, PageHeader, Pill } from "../components/ui";
+
+const AVATAR_BGS = ["bg-lavender", "bg-peach", "bg-mint", "bg-sky"];
 
 export default function Admin() {
   const { t } = useLang();
@@ -32,41 +35,48 @@ export default function Admin() {
     return (
       <div>
         <PageBg variant="night" />
-        <div className="board-cream mx-auto max-w-5xl p-4 md:p-6">
-          <h1 className="title-chunky">{t("admin.title")}</h1>
+        <div className="mx-auto max-w-5xl">
+          <PageHeader title={t("admin.title")} />
           <EmptyState title={t("admin.forbidden")} creature="grey" />
         </div>
       </div>
     );
   }
 
+  const stats = statsQ.data
+    ? [
+        { icon: Users, value: statsQ.data.users, label: t("admin.users"), bg: "bg-lavender" },
+        { icon: Layers, value: statsQ.data.decks, label: t("admin.decksCount"), bg: "bg-sky" },
+        { icon: StickyNote, value: statsQ.data.cards, label: t("admin.cardsCount"), bg: "bg-peach" },
+      ]
+    : [];
+
   return (
     <div>
       <PageBg variant="night" />
-      <div className="board-cream mx-auto max-w-5xl p-4 md:p-6">
-        <h1 className="title-chunky mb-6">{t("admin.title")}</h1>
+      <div className="mx-auto max-w-5xl">
+        <PageHeader title={t("admin.title")} />
         {statsQ.isLoading ? (
           <LoadingState label={t("common.loading")} />
         ) : statsQ.isError ? (
           <ErrorState message={t("common.error")} onRetry={() => statsQ.refetch()} retryLabel={t("common.retry")} />
         ) : statsQ.data ? (
           <>
-            <div className="flex flex-wrap gap-3">
-              <Pill color="bg-butter" className="!py-1.5 !text-lg">
-                <Users className="h-5 w-5" strokeWidth={2.75} />
-                {t("admin.users")}: {statsQ.data.users}
-              </Pill>
-              <Pill color="bg-ice" className="!py-1.5 !text-lg">
-                <Layers className="h-5 w-5" strokeWidth={2.75} />
-                {t("admin.decksCount")}: {statsQ.data.decks}
-              </Pill>
-              <Pill color="bg-blush" className="!py-1.5 !text-lg">
-                <StickyNote className="h-5 w-5" strokeWidth={2.75} />
-                {t("admin.cardsCount")}: {statsQ.data.cards}
-              </Pill>
+            <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
+              {stats.map((s) => (
+                <div key={s.label} className="stat-tile flex items-center gap-3">
+                  <span className={clsx("flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl", s.bg)}>
+                    <s.icon className="h-5 w-5 text-ink" strokeWidth={2.5} />
+                  </span>
+                  <div className="min-w-0">
+                    <p className="text-2xl font-extrabold leading-none tracking-tight text-ink">{s.value}</p>
+                    <p className="mt-1 truncate text-xs font-bold text-muted">{s.label}</p>
+                  </div>
+                </div>
+              ))}
             </div>
 
-            <h2 className="mb-3 mt-8 font-display text-2xl font-extrabold uppercase">
+            <h2 className="mb-3 mt-8 text-xl font-extrabold tracking-tight text-ink">
               {t("admin.userList")}
             </h2>
             {usersQ.isLoading ? (
@@ -79,32 +89,42 @@ export default function Admin() {
               />
             ) : (
               <div className="space-y-2">
-                {(usersQ.data ?? []).map((u) => {
+                {(usersQ.data ?? []).map((u, idx) => {
                   const isSelf = u.id === user?.id;
                   const isAdmin = u.role === "admin";
+                  const initials = (u.name || u.email || "?").trim().charAt(0).toUpperCase();
                   return (
                     <div
                       key={u.id}
-                      className="paper-card flex flex-wrap items-center gap-3 !p-3"
+                      className="card flex flex-wrap items-center gap-3 p-4"
                     >
+                      <span
+                        className={clsx(
+                          "flex h-11 w-11 shrink-0 items-center justify-center rounded-full text-lg font-extrabold text-ink",
+                          AVATAR_BGS[idx % AVATAR_BGS.length],
+                        )}
+                        aria-hidden="true"
+                      >
+                        {initials}
+                      </span>
                       <div className="min-w-0 flex-1">
-                        <p className="truncate font-display text-lg font-extrabold leading-tight">
+                        <p className="truncate text-base font-extrabold leading-tight text-ink">
                           {u.name}
                           {isSelf && (
-                            <span className="ml-2 font-body text-xs font-bold text-ink/50">
+                            <span className="ml-2 text-xs font-bold text-muted">
                               ({t("admin.you")})
                             </span>
                           )}
                         </p>
-                        <p className="truncate font-body text-xs font-bold text-ink/60">{u.email}</p>
+                        <p className="truncate text-xs font-semibold text-muted">{u.email}</p>
                       </div>
-                      <Pill color={isAdmin ? "bg-butter" : "bg-white"} className="!text-xs">
+                      <Pill color={isAdmin ? "bg-sun" : "bg-mist"}>
                         <ShieldCheck className="h-4 w-4" strokeWidth={2.75} />
                         {u.role}
                       </Pill>
                       {!isSelf && (
                         <Button
-                          variant={isAdmin ? "cream" : "yellow"}
+                          variant="soft"
                           className="btn-sm"
                           disabled={roleMut.isPending}
                           onClick={() =>

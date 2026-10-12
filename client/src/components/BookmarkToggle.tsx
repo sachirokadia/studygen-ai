@@ -37,9 +37,9 @@ export default function BookmarkToggle({
       title={t("bookmarks.toggle")}
       aria-label={t("bookmarks.toggle")}
       aria-pressed={!!existing}
-      className={clsx("btn-cream btn-sm", existing && "!bg-btnyellow")}
+      className={clsx("btn-soft btn-sm", existing && "!bg-sun")}
     >
-      <Star className="h-4 w-4" strokeWidth={2.75} fill={existing ? "#2B2B2B" : "none"} />
+      <Star className="h-4 w-4" strokeWidth={2.5} fill={existing ? "#111111" : "none"} />
       {existing ? t("bookmarks.saved") : t("bookmarks.save")}
     </button>
   );

@@ -1,17 +1,14 @@
 import { useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { Link, useNavigate } from "react-router-dom";
-import { FileText, Link2, Plus, Type, Lightbulb, X, Search } from "lucide-react";
+import { FileText, Link2, Plus, Type, Lightbulb, Search } from "lucide-react";
 import clsx from "clsx";
 import { api, ApiError, type Deck, type StudyPackResult } from "../lib/api";
 import { useLang } from "../lib/i18n";
-import { Button, EmptyState, ErrorState, Field, LoadingState, Modal, PageBg, Pill, Sticker, TextArea, TextInput } from "../components/ui";
+import { Button, EmptyState, ErrorState, Field, LoadingState, Modal, PageBg, PageHeader, Pill, Sticker, TextArea, TextInput } from "../components/ui";
 import { AiNotice } from "../components/ui";
-import Creature, { type CreatureKind } from "../components/creatures";
 
 type SourceTab = "pdf" | "youtube" | "text" | "topic";
-
-const DECK_CREATURES: CreatureKind[] = ["grey", "orange", "chick", "dog"];
 
 async function extractPdfText(file: File): Promise<{ text: string; truncated: boolean }> {
   const pdfjs = await import("pdfjs-dist");
@@ -50,11 +47,11 @@ function NewDeckModal({ onClose, onCreated }: { onClose: () => void; onCreated: 
 
   const activeTab: SourceTab = tab;
 
-  const tabs: { id: SourceTab; label: string; icon: typeof FileText; circle: string; tint: string; edge: string }[] = [
-    { id: "topic", label: t("decks.tabTopic"), icon: Lightbulb, circle: "bg-playpink", tint: "bg-blush", edge: "#FF6B9D" },
-    { id: "pdf", label: t("decks.tabPdf"), icon: FileText, circle: "bg-playblue", tint: "bg-ice", edge: "#5B9BD5" },
-    { id: "youtube", label: t("decks.tabYoutube"), icon: Link2, circle: "bg-playorange", tint: "bg-peach", edge: "#FF9F43" },
-    { id: "text", label: t("decks.tabText"), icon: Type, circle: "bg-playgreen", tint: "bg-mint", edge: "#4ADE80" },
+  const tabs: { id: SourceTab; label: string; icon: typeof FileText }[] = [
+    { id: "topic", label: t("decks.tabTopic"), icon: Lightbulb },
+    { id: "pdf", label: t("decks.tabPdf"), icon: FileText },
+    { id: "youtube", label: t("decks.tabYoutube"), icon: Link2 },
+    { id: "text", label: t("decks.tabText"), icon: Type },
   ];
 
   const handlePdf = async (file: File) => {
@@ -170,24 +167,20 @@ function NewDeckModal({ onClose, onCreated }: { onClose: () => void; onCreated: 
     <Modal title={t("decks.newPack")} onClose={onClose}>
       <div className="space-y-4">
         {/* Fix 10: source tabs always visible, no "More options" gate. */}
-        <div className="grid grid-cols-4 gap-2">
-          {tabs.map((tb) => {
-            const active = tab === tb.id;
-            return (
-              <button
-                key={tb.id}
-                onClick={() => setTab(tb.id)}
-                type="button"
-                className={clsx("tab-card", active && "tab-card-active", active && tb.tint)}
-                style={active ? { borderColor: tb.edge } : undefined}
-              >
-                <span className={clsx("flex h-10 w-10 items-center justify-center rounded-full text-white", tb.circle)}>
-                  <tb.icon className="h-5 w-5" strokeWidth={2.75} />
-                </span>
-                {tb.label}
-              </button>
-            );
-          })}
+        <div className="seg" role="tablist">
+          {tabs.map((tb) => (
+            <button
+              key={tb.id}
+              onClick={() => setTab(tb.id)}
+              type="button"
+              role="tab"
+              aria-selected={tab === tb.id}
+              className={clsx("seg-tab flex items-center justify-center gap-1.5", tab === tb.id && "seg-tab-active")}
+            >
+              <tb.icon className="h-4 w-4" strokeWidth={2.5} />
+              {tb.label}
+            </button>
+          ))}
         </div>
 
         {tab === "topic" && (
@@ -213,10 +206,10 @@ function NewDeckModal({ onClose, onCreated }: { onClose: () => void; onCreated: 
                 if (f) void handlePdf(f);
               }}
             />
-            {pdfName && <p className="mt-1 font-body text-xs font-bold text-ink/60">{pdfName}</p>}
+            {pdfName && <p className="mt-1 text-xs font-bold text-muted">{pdfName}</p>}
             {/* Fix 10: warn when the PDF was truncated. */}
             {pdfTruncated && (
-              <p className="mt-2 font-body text-sm font-bold text-amber-700">{t("decks.pdfTruncated")}</p>
+              <p className="mt-2 text-sm font-bold text-amber-700">{t("decks.pdfTruncated")}</p>
             )}
           </Field>
         )}
@@ -225,12 +218,12 @@ function NewDeckModal({ onClose, onCreated }: { onClose: () => void; onCreated: 
           <Field label={t("decks.youtubeUrl")}>
             <div className="flex gap-2">
               <TextInput value={youtubeUrl} onChange={(e) => setYoutubeUrl(e.target.value)} placeholder="https://youtube.com/watch?v=…" />
-              <Button variant="secondary" onClick={handleFetchTranscript} disabled={busy || !youtubeUrl.trim()}>
+              <Button variant="soft" onClick={handleFetchTranscript} disabled={busy || !youtubeUrl.trim()} className="btn-sm !w-auto shrink-0">
                 {t("decks.fetchTranscript")}
               </Button>
             </div>
             {textContent && tab === "youtube" && (
-              <p className="mt-1 font-body text-xs font-bold text-green-700">{t("decks.transcriptReady")}</p>
+              <p className="mt-1 text-xs font-bold text-green-700">{t("decks.transcriptReady")}</p>
             )}
           </Field>
         )}
@@ -245,21 +238,21 @@ function NewDeckModal({ onClose, onCreated }: { onClose: () => void; onCreated: 
           <TextInput value={title} onChange={(e) => setTitle(e.target.value)} placeholder={topic || "Cell Biology 101"} />
         </Field>
 
-        <button onClick={handleGenerate} disabled={!canGenerate} className="btn-gradient w-full !py-4 !text-2xl">
+        <Button onClick={handleGenerate} disabled={!canGenerate} className="!py-4 !text-xl">
           {busy ? progress || t("decks.making") : t("decks.makeMyCards")}
-        </button>
+        </Button>
 
-        <Button variant="cream" onClick={handleEmptyPack} disabled={busy} className="w-full !py-3 !text-xl">
+        <Button variant="soft" onClick={handleEmptyPack} disabled={busy} className="w-full !py-3 !text-xl">
           {t("decks.emptyPack")}
         </Button>
 
         {aiMissing && <AiNotice message={t("common.aiNotConfigured")} />}
         {error && (
           <div className="text-center">
-            <p className="font-body text-sm font-bold text-red-600">{error}</p>
+            <p className="text-sm font-bold text-red-600">{error}</p>
             <button
               onClick={handleGenerate}
-              className="mt-2 font-display text-lg font-extrabold text-ink underline decoration-btnyellow decoration-[3px] underline-offset-4"
+              className="mt-2 text-lg font-extrabold text-ink underline decoration-tangerine decoration-2 underline-offset-4"
             >
               {t("common.retry")}
             </button>
@@ -269,6 +262,13 @@ function NewDeckModal({ onClose, onCreated }: { onClose: () => void; onCreated: 
     </Modal>
   );
 }
+
+const ROW_TINTS: [string, string][] = [
+  ["bg-peach", "text-tangerine"],
+  ["bg-lavender", "text-lilac"],
+  ["bg-sky", "text-skyblue"],
+  ["bg-mint", "text-berry"],
+];
 
 export default function Decks() {
   const { t } = useLang();
@@ -293,17 +293,22 @@ export default function Decks() {
   return (
     <div>
       <PageBg variant="night" />
-      <div className="board-cream mx-auto max-w-4xl p-4 md:p-6">
-        <div className="mb-5 flex items-center justify-between gap-3">
-          <h1 className="title-chunky">{t("decks.title")}</h1>
-          <Link to="/" className="btn-pink btn-sm" aria-label={t("nav.home")}>
-            <X className="h-4 w-4" strokeWidth={3} />
-          </Link>
-        </div>
+      <div className="mx-auto max-w-4xl p-4 md:p-6">
+        <PageHeader
+          title={t("decks.title")}
+          action={
+            <div className="flex items-center gap-2">
+              <Button onClick={() => setModalOpen(true)} className="btn-sm !w-auto">
+                <Plus className="h-4 w-4" strokeWidth={2.75} />
+                {t("decks.newPack")}
+              </Button>
+            </div>
+          }
+        />
 
         <div className="mb-4 flex flex-col gap-2 sm:flex-row">
           <div className="relative flex-1">
-            <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-ink/50" strokeWidth={2.75} />
+            <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted" strokeWidth={2.75} />
             <input
               value={search}
               onChange={(e) => setSearch(e.target.value)}
@@ -313,11 +318,11 @@ export default function Decks() {
             />
           </div>
           <label className="flex items-center gap-2">
-            <span className="font-display text-sm font-extrabold uppercase text-ink/60">{t("decks.sortLabel")}</span>
+            <span className="text-sm font-extrabold uppercase text-muted">{t("decks.sortLabel")}</span>
             <select
               value={sort}
               onChange={(e) => setSort(e.target.value as "az" | "newest" | "most")}
-              className="input !w-auto cursor-pointer !py-2 font-display font-extrabold"
+              className="input !w-auto cursor-pointer !py-2 font-extrabold"
               aria-label={t("decks.sortLabel")}
             >
               <option value="newest">{t("decks.sortNewest")}</option>
@@ -332,31 +337,35 @@ export default function Decks() {
         ) : decksQ.isError ? (
           <ErrorState message={t("common.error")} onRetry={() => decksQ.refetch()} retryLabel={t("common.retry")} />
         ) : decks.length > 0 ? (
-          <div className="grid grid-cols-2 gap-3 md:grid-cols-3">
-            {decks.map((deck, i) => (
-              <Link
-                key={deck.id}
-                to={`/decks/${deck.id}`}
-                className={clsx(
-                  "stat-tile relative block p-3 text-left transition active:scale-[0.98]",
-                  ["bg-blush", "bg-ice", "bg-butter", "bg-mint", "bg-lav", "bg-peach"][i % 6],
-                )}
-              >
-                <div className="flex items-start justify-between">
-                  <span className="font-display text-base font-extrabold text-ink/50">
-                    {String(i + 1).padStart(2, "0")}
+          <div className="space-y-2.5">
+            {decks.map((deck, i) => {
+              const [tint, fg] = ROW_TINTS[i % ROW_TINTS.length]!;
+              return (
+                <Link
+                  key={deck.id}
+                  to={`/decks/${deck.id}`}
+                  className="card flex items-center gap-3 !rounded-3xl p-4 text-left transition active:scale-[0.98]"
+                >
+                  <span className={clsx("flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl", tint, fg)}>
+                    <FileText className="h-6 w-6" strokeWidth={2.5} />
                   </span>
-                  {i === 0 && <Sticker className="!text-xs">{t("decks.new")}</Sticker>}
-                </div>
-                <div className="my-2 flex justify-center">
-                  <Creature kind={DECK_CREATURES[i % DECK_CREATURES.length]!} size={72} className="animate-bob" />
-                </div>
-                <h3 className="font-display text-lg font-extrabold leading-tight">{deck.title}</h3>
-                <Pill color="bg-btnblue" className="mt-2 !text-xs">
-                  {deck.cardCount} {t("decks.cards")}
-                </Pill>
-              </Link>
-            ))}
+                  <span className="min-w-0 flex-1">
+                    <span className="flex items-center gap-2">
+                      <span className="truncate text-base font-extrabold leading-tight text-ink">
+                        {deck.title}
+                      </span>
+                      {i === 0 && <Sticker className="!text-xs">{t("decks.new")}</Sticker>}
+                    </span>
+                    <span className="mt-0.5 block text-sm font-bold text-muted">
+                      {new Date(deck.createdAt).toLocaleDateString()}
+                    </span>
+                  </span>
+                  <Pill className="!bg-mist !text-xs">
+                    {deck.cardCount} {t("decks.cards")}
+                  </Pill>
+                </Link>
+              );
+            })}
           </div>
         ) : (
           <EmptyState
@@ -370,7 +379,7 @@ export default function Decks() {
           />
         )}
 
-        <Button variant="yellow" onClick={() => setModalOpen(true)} className="mt-6 w-full !py-4 !text-2xl">
+        <Button onClick={() => setModalOpen(true)} className="mt-6 w-full !py-4 !text-xl">
           <Plus className="h-5 w-5" strokeWidth={2.75} />
           {t("decks.newPack")}
         </Button>

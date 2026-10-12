@@ -15,7 +15,7 @@ function fmt(totalSeconds: number): string {
   return `${String(m).padStart(2, "0")}:${String(s).padStart(2, "0")}`;
 }
 
-/** Focus timer — FOCUS screen style: dark purple, hanging timer tag. */
+/** Focus timer — soft pastel, big timer card, segmented presets, gradient CTA. */
 export default function Focus() {
   const { t } = useLang();
   const [minutes, setMinutes] = useState(25);
@@ -69,39 +69,41 @@ export default function Focus() {
     <div>
       <PageBg variant="night" />
       <div className="mx-auto max-w-md text-center">
-        <h1 className="title-chunky-light">{t("focus.title")}</h1>
+        <h1 className="text-[28px] font-extrabold leading-tight tracking-tight text-ink">
+          {t("focus.title")}
+        </h1>
 
         {done ? (
-          <div className="paper-card relative mt-8 p-8">
-            <Creature kind="dog" size={120} className="mx-auto animate-bob" />
-            <p className="mt-4 font-display text-4xl font-extrabold uppercase">{t("focus.done")}</p>
-            <p className="mt-2 font-display text-3xl font-extrabold text-ink/70">
-              +{coins} {t("focus.coinsEarned")}
-            </p>
-            <Button variant="green" className="mt-6 w-full !py-4 !text-2xl" onClick={stop}>
+          <div className="card relative mt-8 p-8">
+            <Creature kind="dog" size={120} className="mx-auto animate-float" />
+            <p className="mt-4 text-4xl font-extrabold uppercase tracking-tight text-ink">{t("focus.done")}</p>
+            <div className="stat-tile mx-auto mt-4 w-fit !px-8">
+              <p className="text-3xl font-extrabold tabular-nums text-ink">
+                +{coins}
+              </p>
+              <p className="text-sm font-bold text-ink/60">{t("focus.coinsEarned")}</p>
+            </div>
+            <Button variant="primary" className="mt-6 w-full !py-4 !text-2xl" onClick={stop}>
               {t("focus.goOn")}
             </Button>
           </div>
         ) : (
           <>
             {/* Timer card */}
-            <div className="paper-card mx-auto mt-10 w-fit !px-10 !py-6">
-              <p className="font-display text-7xl font-extrabold tabular-nums">{fmt(left)}</p>
+            <div className="card mx-auto mt-10 w-fit !px-10 !py-6">
+              <p className="text-7xl font-extrabold tabular-nums tracking-tight text-ink">{fmt(left)}</p>
             </div>
 
-            <p className="mt-8 font-display text-xl font-extrabold uppercase text-paper/80">
+            <p className="mt-8 text-xl font-extrabold uppercase tracking-tight text-ink/60">
               {t("focus.pickMinutes")}
             </p>
-            <div className="mt-3 flex justify-center gap-3">
+            <div className="seg mx-auto mt-3 max-w-xs">
               {PRESETS.map((p) => (
                 <button
                   key={p}
                   onClick={() => pick(p)}
                   disabled={running}
-                  className={clsx(
-                    "pill !px-5 !py-2 !text-xl",
-                    minutes === p ? "!bg-playyellow" : "bg-white/70",
-                  )}
+                  className={clsx("seg-tab", minutes === p && "seg-tab-active")}
                 >
                   {p} {t("focus.minutes")}
                 </button>
@@ -110,17 +112,17 @@ export default function Focus() {
 
             <div className="mt-8 flex justify-center gap-4">
               {!running ? (
-                <button onClick={start} className="btn-gradient !px-10 !py-4 !text-2xl">
+                <button onClick={start} className="btn-primary !w-auto !px-10 !py-4 !text-2xl">
                   <Play className="h-6 w-6" strokeWidth={2.75} />
                   {t("focus.start")}
                 </button>
               ) : (
-                <Button variant="yellow" onClick={pause} className="!px-10 !py-4 !text-2xl">
+                <Button variant="primary" onClick={pause} className="!w-auto !px-10 !py-4 !text-2xl">
                   <Pause className="h-6 w-6" strokeWidth={2.75} />
                   {t("focus.pause")}
                 </Button>
               )}
-              <Button variant="pink" onClick={stop} className="!px-8 !py-4 !text-2xl">
+              <Button variant="pink" onClick={stop} className="!w-auto !px-8 !py-4 !text-2xl">
                 <Square className="h-6 w-6" strokeWidth={2.75} />
                 {t("focus.stop")}
               </Button>

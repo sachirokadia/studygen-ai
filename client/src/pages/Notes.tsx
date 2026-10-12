@@ -111,7 +111,7 @@ export default function Notes() {
       <PageHeader
         title={t("nav.notes")}
         action={
-          <button onClick={() => openEditor(null)} className="btn-gradient btn-sm">
+          <button onClick={() => openEditor(null)} className="btn-primary btn-sm !w-auto">
             <Plus className="h-4 w-4" strokeWidth={2.75} />
             {t("notes.new")}
           </button>
@@ -128,46 +128,44 @@ export default function Notes() {
       ) : notesQ.isError ? (
         <ErrorState message={t("common.error")} onRetry={() => notesQ.refetch()} retryLabel={t("common.retry")} />
       ) : notesQ.data && notesQ.data.length > 0 ? (
-        <div className="board-brown p-4 md:p-6">
-          <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
-            {notesQ.data.map((n) => (
-              <div
-                key={n.id}
-                onClick={() => openEditor(n)}
-                className="paper-card relative cursor-pointer p-4 transition active:scale-[0.98]"
-              >
-                <p className="truncate font-display text-xl font-extrabold uppercase leading-tight">{n.title}</p>
-                <p className="mt-1 line-clamp-3 font-body text-xs font-semibold text-ink/60">{n.content.slice(0, 120)}</p>
-                <div className="mt-3 flex flex-wrap gap-2">
-                  <span onClick={(e) => e.stopPropagation()}>
-                    <BookmarkToggle kind="note" refId={n.id} label={n.title} />
-                  </span>
-                  <Button
-                    variant="cream"
-                    className="btn-sm"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      openEditor(n);
-                    }}
-                  >
-                    <Pencil className="h-4 w-4" strokeWidth={2.75} />
-                    {t("btn.edit")}
-                  </Button>
-                  <Button
-                    variant="pink"
-                    className="btn-sm"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      if (window.confirm(t("common.confirmDelete"))) deleteMut.mutate(n.id);
-                    }}
-                  >
-                    <Trash2 className="h-4 w-4" strokeWidth={2.75} />
-                    {t("btn.delete")}
-                  </Button>
-                </div>
+        <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+          {notesQ.data.map((n) => (
+            <div
+              key={n.id}
+              onClick={() => openEditor(n)}
+              className="card relative cursor-pointer p-4 transition active:scale-[0.98]"
+            >
+              <p className="truncate text-xl font-extrabold uppercase leading-tight tracking-tight text-ink">{n.title}</p>
+              <p className="mt-1 line-clamp-3 text-xs font-semibold text-ink/60">{n.content.slice(0, 120)}</p>
+              <div className="mt-3 flex flex-wrap gap-2">
+                <span onClick={(e) => e.stopPropagation()}>
+                  <BookmarkToggle kind="note" refId={n.id} label={n.title} />
+                </span>
+                <Button
+                  variant="soft"
+                  className="btn-sm"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    openEditor(n);
+                  }}
+                >
+                  <Pencil className="h-4 w-4" strokeWidth={2.75} />
+                  {t("btn.edit")}
+                </Button>
+                <Button
+                  variant="pink"
+                  className="btn-sm"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    if (window.confirm(t("common.confirmDelete"))) deleteMut.mutate(n.id);
+                  }}
+                >
+                  <Trash2 className="h-4 w-4" strokeWidth={2.75} />
+                  {t("btn.delete")}
+                </Button>
               </div>
-            ))}
-          </div>
+            </div>
+          ))}
         </div>
       ) : (
         <EmptyState title={t("common.empty")} />
@@ -201,10 +199,10 @@ export default function Notes() {
               </Button>
             )}
           </div>
-          {saveMut.isError && <p className="mt-2 font-body text-sm font-bold text-red-600">{t("common.error")}</p>}
+          {saveMut.isError && <p className="mt-2 text-sm font-bold text-red-600">{t("common.error")}</p>}
 
-          <div className="mt-6 border-t-2 border-dashed border-ink/10 pt-4">
-            <p className="mb-2 font-display text-xl font-extrabold uppercase">
+          <div className="mt-6 border-t-2 border-dashed border-[#ECECF1] pt-4">
+            <p className="mb-2 text-xl font-extrabold uppercase tracking-tight text-ink">
               <Sparkles className="mr-1 inline h-4 w-4" strokeWidth={2.75} />
               {t("notes.generateCards")} ({clozes.length})
             </p>
@@ -218,14 +216,14 @@ export default function Notes() {
                     </option>
                   ))}
                 </select>
-                <Button variant="cream" onClick={handleGenerateCards} disabled={!targetDeck || clozes.length === 0}>
+                <Button variant="soft" onClick={handleGenerateCards} disabled={!targetDeck || clozes.length === 0}>
                   {t("notes.generateCards")}
                 </Button>
               </div>
             ) : (
-              <p className="font-body text-sm font-semibold text-ink/60">{t("notes.noDecks")}</p>
+              <p className="text-sm font-semibold text-ink/60">{t("notes.noDecks")}</p>
             )}
-            {genMsg && <p className="mt-2 font-display text-xl font-extrabold uppercase text-playgreendark">{genMsg}</p>}
+            {genMsg && <p className="mt-2 text-xl font-extrabold uppercase tracking-tight text-ink">{genMsg}</p>}
           </div>
         </Modal>
       )}

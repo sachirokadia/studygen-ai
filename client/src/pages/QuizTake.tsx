@@ -4,7 +4,7 @@ import { Link, useNavigate, useParams } from "react-router-dom";
 import clsx from "clsx";
 import { api, type Quiz } from "../lib/api";
 import { useLang } from "../lib/i18n";
-import { Button, EmptyState, ErrorState, LoadingState, PageBg, Pill } from "../components/ui";
+import { Button, EmptyState, ErrorState, LoadingState, PageBg } from "../components/ui";
 
 function shuffle<T>(arr: T[]): T[] {
   const a = [...arr];
@@ -106,22 +106,28 @@ export default function QuizTake() {
   return (
     <div className="mx-auto max-w-2xl">
       <PageBg variant="night" />
-      <h1 className="title-chunky-light text-center">{quiz.title}</h1>
+      <h1 className="text-center text-[28px] font-extrabold leading-tight tracking-tight text-ink md:text-4xl">
+        {quiz.title}
+      </h1>
 
-      <div className="mb-6 mt-4 flex justify-center">
-        <Pill className="!bg-lav !text-xl">
-          {qi + 1} {t("review.of")} {questions.length}
-        </Pill>
+      <div className="mb-4 mt-3">
+        <div className="mb-1.5 flex items-center justify-end text-sm font-extrabold">
+          <span className="text-ink">
+            {qi + 1} {t("review.of")} {questions.length}
+          </span>
+        </div>
+        <div className="progress-track" role="progressbar" aria-valuenow={qi + 1} aria-valuemax={questions.length}>
+          <div className="progress-fill" style={{ width: `${((qi + 1) / questions.length) * 100}%` }} />
+        </div>
       </div>
 
-      <div className="paper-card !rounded-[28px] p-6 md:p-8">
+      <div className="card !rounded-[28px] p-6 md:p-8">
         <div id="quiz-card">
-        <p className="font-display text-2xl font-extrabold leading-snug md:text-3xl">{q.question}</p>
+        <p className="text-2xl font-extrabold leading-snug tracking-tight text-ink md:text-3xl">{q.question}</p>
         <div className="mt-6 space-y-3">
           {q.options.map((opt, oi) => {
             const selected = answers[q.id] === oi;
-            const tints = ["bg-blush", "bg-ice", "bg-butter", "bg-mint"];
-            const solids = ["bg-playpink", "bg-playblue", "bg-playorange", "bg-playgreen"];
+            const tints = ["bg-sky", "bg-lavender", "bg-peach", "bg-mint"];
             return (
               <button
                 key={oi}
@@ -131,19 +137,21 @@ export default function QuizTake() {
                 }}
                 className={clsx(
                   "flex w-full items-center gap-3 rounded-[20px] px-4 py-3.5 text-left transition active:scale-[0.98]",
-                  selected ? clsx(solids[oi % solids.length], "text-white") : tints[oi % tints.length],
+                  selected
+                    ? "bg-peach ring-[3px] ring-tangerine"
+                    : tints[oi % tints.length],
                 )}
-                style={{ boxShadow: selected ? "0 10px 22px -10px rgba(43,43,43,0.5)" : "0 6px 14px -8px rgba(90,70,130,0.25)" }}
+                style={{ boxShadow: selected ? "0 10px 22px -10px rgba(255,169,77,0.6)" : "0 6px 14px -8px rgba(90,70,130,0.25)" }}
               >
                 <span
                   className={clsx(
-                    "flex h-9 w-9 shrink-0 items-center justify-center rounded-full font-display text-base font-extrabold",
-                    selected ? "bg-white/30 text-white" : "bg-white text-ink",
+                    "flex h-9 w-9 shrink-0 items-center justify-center rounded-2xl text-base font-extrabold",
+                    selected ? "bg-tangerine text-white" : "bg-white text-ink",
                   )}
                 >
                   {String.fromCharCode(65 + oi)}
                 </span>
-                <span className="font-body text-base font-bold">{opt}</span>
+                <span className="text-base font-bold text-ink">{opt}</span>
               </button>
             );
           })}
@@ -152,8 +160,8 @@ export default function QuizTake() {
       </div>
 
       {missedMsg && (
-        <div className="paper-card mt-4 border-btnyellow p-4 text-center">
-          <p className="font-display text-xl font-extrabold uppercase">{t("quiz.missedOne")}</p>
+        <div className="card mt-4 border-2 border-amber/50 p-4 text-center">
+          <p className="text-xl font-extrabold uppercase text-ink">{t("quiz.missedOne")}</p>
         </div>
       )}
 
@@ -172,12 +180,12 @@ export default function QuizTake() {
 
       <div className="mt-6 flex flex-col gap-3">
         {!isLast ? (
-          <Button variant="blue" onClick={() => setQi((i) => i + 1)} className="w-full !py-4 !text-2xl">
+          <Button variant="primary" onClick={() => setQi((i) => i + 1)} className="w-full !py-4 !text-2xl">
             {t("btn.next")}
           </Button>
         ) : (
           <Button
-            variant="green"
+            variant="primary"
             onClick={handleDone}
             disabled={submitMut.isPending}
             className="w-full !py-4 !text-2xl"
@@ -185,7 +193,7 @@ export default function QuizTake() {
             {submitMut.isPending ? t("common.loading") : t("quiz.submit")}
           </Button>
         )}
-        <Link to={`/decks/${quiz.deckId}`} className="btn-pink btn-sm text-center">
+        <Link to={`/decks/${quiz.deckId}`} className="btn-soft btn-sm text-center">
           {t("btn.cancel")}
         </Link>
       </div>

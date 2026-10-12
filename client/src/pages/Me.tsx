@@ -3,8 +3,7 @@ import { Bookmark, LogOut, Map, MessageCircle, ShieldCheck, Sparkles, StickyNote
 import clsx from "clsx";
 import { useAuth } from "../lib/auth";
 import { useLang, type Lang } from "../lib/i18n";
-import { PageBg } from "../components/ui";
-import Creature from "../components/creatures";
+import { Button, PageBg } from "../components/ui";
 
 export default function Me() {
   const { user, logout } = useAuth();
@@ -12,12 +11,12 @@ export default function Me() {
   const navigate = useNavigate();
 
   const rows = [
-    { to: "/notes", label: t("nav.notes"), icon: StickyNote, color: "bg-playpink" },
-    { to: "/paths", label: t("nav.paths"), icon: Map, color: "bg-playpurple" },
-    { to: "/focus", label: t("me.focus"), icon: Timer, color: "bg-playblue" },
-    { to: "/explain", label: t("nav.explain"), icon: Sparkles, color: "bg-playyellow" },
-    { to: "/chat", label: t("nav.chat"), icon: MessageCircle, color: "bg-playgreen" },
-    { to: "/bookmarks", label: t("nav.bookmarks"), icon: Bookmark, color: "bg-playorange" },
+    { to: "/notes", label: t("nav.notes"), icon: StickyNote, tint: "bg-peach", fg: "text-tangerine" },
+    { to: "/paths", label: t("nav.paths"), icon: Map, tint: "bg-lavender", fg: "text-lilac" },
+    { to: "/focus", label: t("me.focus"), icon: Timer, tint: "bg-sky", fg: "text-skyblue" },
+    { to: "/explain", label: t("nav.explain"), icon: Sparkles, tint: "bg-mint", fg: "text-berry" },
+    { to: "/chat", label: t("nav.chat"), icon: MessageCircle, tint: "bg-peach", fg: "text-pinkpop" },
+    { to: "/bookmarks", label: t("nav.bookmarks"), icon: Bookmark, tint: "bg-lavender", fg: "text-amber" },
   ];
 
   const handleLogout = () => {
@@ -27,63 +26,81 @@ export default function Me() {
 
   const switchLang = (l: Lang) => setLang(l);
 
+  const initials = (user?.name ?? t("nav.me"))
+    .split(/\s+/)
+    .map((w) => w[0])
+    .filter(Boolean)
+    .slice(0, 2)
+    .join("")
+    .toUpperCase();
+
   return (
     <div>
       <PageBg variant="sky" />
-      <div className="paper-card relative mx-auto max-w-md p-6 pt-8">
-        <div className="mb-6 flex flex-col items-center text-center">
-          <Creature kind="dog" size={96} className="animate-bob" />
-          <h1 className="title-chunky mt-2">{user?.name ?? t("nav.me")}</h1>
-          <p className="mt-1 font-body text-sm font-bold text-ink/60">{user?.email}</p>
+      <div className="mx-auto max-w-md">
+        {/* ===== Profile header ===== */}
+        <div className="card mx-auto p-6 pt-8">
+          <div className="mb-6 flex flex-col items-center text-center">
+            <span className="flex h-20 w-20 items-center justify-center rounded-full bg-lavender text-3xl font-extrabold text-lilac">
+              {initials}
+            </span>
+            <h1 className="mt-3 text-2xl font-extrabold tracking-tight text-ink">
+              {user?.name ?? t("nav.me")}
+            </h1>
+            <p className="mt-1 text-sm font-bold text-muted">{user?.email}</p>
+          </div>
         </div>
 
-        <div className="space-y-3">
+        {/* ===== Settings list ===== */}
+        <div className="card mt-4 divide-y divide-mist overflow-hidden">
           {rows.map((r) => (
             <Link
               key={r.to}
               to={r.to}
-              className="paper-card flex items-center gap-3 !p-4 transition active:scale-[0.98]"
+              className="flex items-center gap-3 p-4 transition active:bg-mist/60"
             >
-              <span className={clsx("flex h-11 w-11 shrink-0 items-center justify-center rounded-full text-white", r.color)}>
-                <r.icon className="h-5 w-5" strokeWidth={2.75} />
+              <span className={clsx("flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl", r.tint, r.fg)}>
+                <r.icon className="h-5 w-5" strokeWidth={2.5} />
               </span>
-              <span className="font-display text-xl font-extrabold">{r.label}</span>
+              <span className="flex-1 text-base font-extrabold text-ink">{r.label}</span>
+              <span className="text-xl font-extrabold text-muted" aria-hidden="true">→</span>
             </Link>
           ))}
           {user?.role === "admin" && (
-            <Link to="/admin" className="paper-card flex items-center gap-3 !p-4 transition active:scale-[0.98]">
-              <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-ink text-white">
-                <ShieldCheck className="h-5 w-5" strokeWidth={2.75} />
+            <Link to="/admin" className="flex items-center gap-3 p-4 transition active:bg-mist/60">
+              <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-ink text-white">
+                <ShieldCheck className="h-5 w-5" strokeWidth={2.5} />
               </span>
-              <span className="font-display text-xl font-extrabold">{t("nav.admin")}</span>
+              <span className="flex-1 text-base font-extrabold text-ink">{t("nav.admin")}</span>
+              <span className="text-xl font-extrabold text-muted" aria-hidden="true">→</span>
             </Link>
           )}
-        </div>
 
-        <div className="mt-6 border-t-2 border-dashed border-ink/10 pt-4">
-          <p className="mb-2 text-center font-display text-lg font-extrabold uppercase text-ink/60">
-            {t("me.language")}
-          </p>
-          <div className="flex justify-center gap-2">
-            <button
-              onClick={() => switchLang("en")}
-              className={clsx("pill cursor-pointer", lang === "en" ? "!bg-playyellow" : "opacity-60")}
-            >
-              English
-            </button>
-            <button
-              onClick={() => switchLang("hi")}
-              className={clsx("pill cursor-pointer", lang === "hi" ? "!bg-playyellow" : "opacity-60")}
-            >
-              हिंदी
-            </button>
+          <div className="flex items-center gap-3 p-4">
+            <span className="flex-1 text-base font-extrabold text-ink">{t("me.language")}</span>
+            <div className="seg w-44">
+              <button
+                onClick={() => switchLang("en")}
+                className={clsx("seg-tab", lang === "en" && "seg-tab-active")}
+                aria-pressed={lang === "en"}
+              >
+                English
+              </button>
+              <button
+                onClick={() => switchLang("hi")}
+                className={clsx("seg-tab", lang === "hi" && "seg-tab-active")}
+                aria-pressed={lang === "hi"}
+              >
+                हिंदी
+              </button>
+            </div>
           </div>
         </div>
 
-        <button onClick={handleLogout} className="btn-pink mt-6 w-full !py-4 !text-2xl">
-          <LogOut className="h-6 w-6" strokeWidth={2.75} />
+        <Button variant="dark" onClick={handleLogout} className="mt-6 w-full !py-4 !text-xl">
+          <LogOut className="h-5 w-5" strokeWidth={2.75} />
           {t("me.logout")}
-        </button>
+        </Button>
       </div>
     </div>
   );

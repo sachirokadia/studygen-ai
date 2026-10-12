@@ -16,6 +16,13 @@ export default function Bookmarks() {
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ["bookmarks"] }),
   });
 
+  const KIND_TINTS: Record<string, string> = {
+    note: "bg-sky",
+    flashcard: "bg-peach",
+    deck: "bg-lavender",
+    quiz: "bg-mint",
+  };
+
   return (
     <div>
       <PageBg variant="sky" />
@@ -26,19 +33,23 @@ export default function Bookmarks() {
       ) : bmQ.isError ? (
         <ErrorState message={t("common.error")} onRetry={() => bmQ.refetch()} retryLabel={t("common.retry")} />
       ) : bmQ.data && bmQ.data.length > 0 ? (
-        <div className="board-brown p-4 md:p-6">
-          <div className="grid gap-5 sm:grid-cols-2">
-            {bmQ.data.map((b) => (
-              <div key={b.id} className="paper-card relative p-4">
-                <div className="flex items-center gap-2">
-                  <Bookmark className="h-5 w-5 shrink-0" strokeWidth={2.75} />
-                  <p className="truncate font-display text-lg font-extrabold uppercase leading-tight">{b.label}</p>
-                </div>
-                <p className="mt-1 font-body text-xs font-bold text-ink/50">
+        <div className="grid gap-4 sm:grid-cols-2">
+          {bmQ.data.map((b) => (
+            <div key={b.id} className="card relative flex items-center gap-4 p-4">
+              <span
+                className={`flex h-14 w-14 shrink-0 items-center justify-center rounded-[20px] text-ink ${
+                  KIND_TINTS[b.kind] ?? "bg-mist"
+                }`}
+              >
+                <Bookmark className="h-6 w-6" strokeWidth={2.5} />
+              </span>
+              <div className="min-w-0 flex-1">
+                <p className="truncate text-lg font-extrabold uppercase leading-tight tracking-tight text-ink">{b.label}</p>
+                <p className="mt-0.5 text-xs font-bold text-ink/50">
                   {b.kind} · {new Date(b.createdAt).toLocaleDateString()}
                 </p>
-                <div className="mt-3 flex flex-wrap gap-2">
-                  <Link to="/review" className="btn-blue btn-sm">
+                <div className="mt-2.5 flex flex-wrap gap-2">
+                  <Link to="/review" className="btn-skyblue btn-sm">
                     REVIEW
                   </Link>
                   <Button
@@ -54,11 +65,11 @@ export default function Bookmarks() {
                   </Button>
                 </div>
               </div>
-            ))}
-          </div>
+            </div>
+          ))}
         </div>
       ) : (
-        <EmptyState title={t("bookmarks.empty")} />
+        <EmptyState title={t("bookmarks.empty")} creature="chick" />
       )}
     </div>
   );

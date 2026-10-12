@@ -2,12 +2,14 @@ import { useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Link } from "react-router-dom";
 import { Plus, Trash2 } from "lucide-react";
+import clsx from "clsx";
 import { api, type LearningPath } from "../lib/api";
 import { useLang } from "../lib/i18n";
 import { Button, EmptyState, ErrorState, Field, LoadingState, Modal, PageBg, PageHeader, Pill, TextArea, TextInput } from "../components/ui";
-import Creature, { OrangeBlob, SpottedDog, type CreatureKind } from "../components/creatures";
+import Creature, { type CreatureKind } from "../components/creatures";
 
 const KIND_CYCLE: CreatureKind[] = ["grey", "orange", "chick", "dog"];
+const BANDS = ["bg-lavender", "bg-mint", "bg-peach", "bg-sky"];
 
 export default function Paths() {
   const { t } = useLang();
@@ -39,10 +41,10 @@ export default function Paths() {
       <PageHeader
         title={t("nav.paths")}
         action={
-          <button onClick={() => setModalOpen(true)} className="btn-gradient btn-sm">
+          <Button variant="primary" onClick={() => setModalOpen(true)} className="!h-auto !w-auto btn-sm">
             <Plus className="h-4 w-4" strokeWidth={2.75} />
             {t("paths.new")}
-          </button>
+          </Button>
         }
       />
 
@@ -51,35 +53,45 @@ export default function Paths() {
       ) : pathsQ.isError ? (
         <ErrorState message={t("common.error")} onRetry={() => pathsQ.refetch()} retryLabel={t("common.retry")} />
       ) : pathsQ.data && pathsQ.data.length > 0 ? (
-        <div className="board-red p-4 md:p-6">
-          <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
-            {pathsQ.data.map((p, idx) => {
-              const total = p.topics?.length ?? 0;
-              const done = p.topics?.filter((x) => x.status === "done").length ?? 0;
-              return (
-                <div key={p.id} className="paper-card relative p-4">
-                  <div className="mb-2 flex items-center gap-3">
-                    <Creature kind={KIND_CYCLE[idx % KIND_CYCLE.length]} size={56} className="animate-bob" />
-                    <Link to={`/paths/${p.id}`}>
-                      <h3 className="font-display text-xl font-extrabold uppercase leading-tight hover:underline">{p.title}</h3>
-                    </Link>
-                  </div>
-                  {p.description && (
-                    <p className="line-clamp-2 font-body text-sm font-semibold text-ink/60">{p.description}</p>
+        <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+          {pathsQ.data.map((p, idx) => {
+            const total = p.topics?.length ?? 0;
+            const done = p.topics?.filter((x) => x.status === "done").length ?? 0;
+            const pct = total > 0 ? Math.round((done / total) * 100) : 0;
+            return (
+              <div key={p.id} className="card overflow-hidden">
+                <div className={clsx("flex items-center justify-between px-4 py-2.5", BANDS[idx % BANDS.length])}>
+                  <Creature kind={KIND_CYCLE[idx % KIND_CYCLE.length]} size={44} className="animate-float" />
+                  {total > 0 && (
+                    <Pill color="bg-white/80">
+                      {done}/{total} {t("paths.done")}
+                    </Pill>
                   )}
-                  <div className="mt-3 flex flex-wrap items-center gap-2">
-                    {total > 0 && (
-                      <Pill color={done === total ? "bg-mint" : "bg-butter"}>
-                        {done}/{total} {t("paths.done")}
-                      </Pill>
-                    )}
-                    <div className="flex-1" />
-                    <Link to={`/paths/${p.id}`} className="btn-blue btn-sm">
+                </div>
+                <div className="p-5">
+                  <Link to={`/paths/${p.id}`}>
+                    <h3 className="text-xl font-extrabold tracking-tight text-ink hover:underline">{p.title}</h3>
+                  </Link>
+                  {p.description && (
+                    <p className="mt-1 line-clamp-2 text-sm font-medium text-muted">{p.description}</p>
+                  )}
+                  {total > 0 && (
+                    <div className="mt-4">
+                      <div className="progress-track">
+                        <div className="progress-fill" style={{ width: `${pct}%` }} />
+                      </div>
+                      <p className="mt-1.5 text-xs font-bold text-muted">
+                        {done}/{total} {t("paths.done")} · {pct}%
+                      </p>
+                    </div>
+                  )}
+                  <div className="mt-4 flex items-center gap-2">
+                    <Link to={`/paths/${p.id}`} className="btn-dark btn-sm flex-1 text-center">
                       OPEN
                     </Link>
                     <Button
-                      variant="pink"
-                      className="btn-sm"
+                      variant="danger"
+                      className="btn-sm !px-3"
                       onClick={() => {
                         if (window.confirm(t("common.confirmDelete"))) deleteMut.mutate(p.id);
                       }}
@@ -89,22 +101,18 @@ export default function Paths() {
                     </Button>
                   </div>
                 </div>
-              );
-            })}
-          </div>
-          <div className="mt-4 flex items-end justify-center gap-8">
-            <OrangeBlob size={88} className="animate-bob" />
-            <SpottedDog size={88} className="animate-bob" />
-          </div>
+              </div>
+            );
+          })}
         </div>
       ) : (
         <EmptyState
           title={t("paths.empty")}
           action={
-            <button onClick={() => setModalOpen(true)} className="btn-gradient btn-sm">
+            <Button onClick={() => setModalOpen(true)} className="!w-auto">
               <Plus className="h-4 w-4" strokeWidth={2.75} />
               {t("paths.new")}
-            </button>
+            </Button>
           }
         />
       )}
@@ -118,10 +126,10 @@ export default function Paths() {
             <Field label={t("paths.topicDesc")}>
               <TextArea value={description} onChange={(e) => setDescription(e.target.value)} rows={3} />
             </Field>
-            <button onClick={() => createMut.mutate()} disabled={createMut.isPending || !title.trim()} className="btn-gradient w-full">
+            <Button onClick={() => createMut.mutate()} disabled={createMut.isPending || !title.trim()}>
               {createMut.isPending ? t("common.loading") : t("btn.create")}
-            </button>
-            {createMut.isError && <p className="font-body text-sm font-bold text-red-700">{t("common.error")}</p>}
+            </Button>
+            {createMut.isError && <p className="text-sm font-bold text-red-700">{t("common.error")}</p>}
           </div>
         </Modal>
       )}

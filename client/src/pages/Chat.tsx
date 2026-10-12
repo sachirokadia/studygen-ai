@@ -47,17 +47,17 @@ export default function Chat() {
     <div>
       <PageBg variant="sky" />
       <div className="mx-auto flex max-w-3xl flex-col" style={{ height: "calc(100vh - 12rem)" }}>
-        <div className="mb-6 flex flex-wrap items-center justify-between gap-3">
+        <div className="mb-5 flex flex-wrap items-center justify-between gap-3">
           <div className="flex items-center gap-3">
-            <Creature kind="orange" size={64} className="animate-bob" />
-            <h1 className="title-chunky">{t("chat.title")}</h1>
+            <Creature kind="orange" size={56} className="animate-float" />
+            <h1 className="text-[26px] font-extrabold tracking-tight text-ink">{t("chat.title")}</h1>
           </div>
           {decksQ.data ? (
-            <span className="date-tag">
+            <label className="chip !py-2.5">
               <select
                 value={deckId}
                 onChange={(e) => setDeckId(e.target.value)}
-                className="bg-transparent font-display text-lg font-extrabold outline-none"
+                className="max-w-[180px] cursor-pointer bg-transparent text-sm font-extrabold text-ink outline-none"
                 aria-label={t("chat.selectDeck")}
               >
                 <option value="">{t("chat.selectDeck")}</option>
@@ -67,7 +67,7 @@ export default function Chat() {
                   </option>
                 ))}
               </select>
-            </span>
+            </label>
           ) : undefined}
         </div>
 
@@ -79,25 +79,25 @@ export default function Chat() {
             {messages.map((m, i) => (
               <div key={i} className={clsx("flex", m.role === "user" ? "justify-end" : "justify-start")}>
                 {m.role === "assistant" ? (
-                  <div className="mr-auto flex max-w-[80%] items-start gap-2">
-                    <OrangeBlob size={40} className="mt-1 shrink-0 animate-bob" />
-                    <div className="paper-card p-3">
+                  <div className="mr-auto flex max-w-[85%] items-start gap-2">
+                    <OrangeBlob size={36} className="mt-1 shrink-0 animate-float" />
+                    <div className="card rounded-2xl rounded-tl-md p-3.5">
                       <Markdown text={m.content} />
                     </div>
                   </div>
                 ) : (
-                  <div className="paper-card !bg-ice ml-auto max-w-[80%] p-3">
-                    <p className="font-body text-sm font-semibold text-ink">{m.content}</p>
+                  <div className="ml-auto max-w-[80%] rounded-2xl rounded-br-md bg-peach p-3.5">
+                    <p className="text-sm font-semibold text-ink">{m.content}</p>
                   </div>
                 )}
               </div>
             ))}
             {chatMut.isPending && (
               <div className="flex justify-start">
-                <div className="paper-card mr-auto p-3">
+                <div className="card mr-auto rounded-2xl rounded-tl-md p-3.5">
                   <span className="flex items-center gap-2">
                     <Spinner className="h-5 w-5" />
-                    <span className="font-display text-lg font-extrabold uppercase text-ink/60">{t("common.loading")}</span>
+                    <span className="text-sm font-bold text-muted">{t("common.loading")}</span>
                   </span>
                 </div>
               </div>
@@ -105,18 +105,19 @@ export default function Chat() {
             <div ref={bottomRef} />
           </div>
 
-          <div className="border-t-2 border-dashed border-ink/10 p-3">
+          <div className="border-t border-[#ECECF1] p-3">
             {aiMissing && (
               <div className="mb-3">
                 <AiNotice message={t("common.aiNotConfigured")} />
               </div>
             )}
             {decksQ.isError && <ErrorState message={t("common.error")} />}
-            <div className="flex gap-2">
+            <div className="flex items-center gap-2">
               <TextInput
                 value={input}
                 onChange={(e) => setInput(e.target.value)}
                 placeholder={t("chat.placeholder")}
+                className="!rounded-full !py-3.5"
                 onKeyDown={(e) => {
                   if (e.key === "Enter" && !e.shiftKey) {
                     e.preventDefault();
@@ -124,9 +125,14 @@ export default function Chat() {
                   }
                 }}
               />
-              <Button variant="yellow" onClick={send} disabled={chatMut.isPending || !input.trim()} aria-label={t("btn.send")} className="shrink-0">
-                <Send className="h-4 w-4" strokeWidth={2.75} />
-                {t("btn.send")}
+              <Button
+                variant="accent"
+                onClick={send}
+                disabled={chatMut.isPending || !input.trim()}
+                aria-label={t("btn.send")}
+                className="shrink-0 !h-[52px] !w-[52px] !rounded-full !p-0"
+              >
+                <Send className="h-5 w-5" strokeWidth={2.75} />
               </Button>
             </div>
           </div>

@@ -1,103 +1,94 @@
-/* The four creatures from the reference image.
-   Flat fills, thick #2B2B2B outlines, dot eyes. */
+/* Soft cloud mascots for the new design language.
+   Rounded cloud shapes with simple closed-eye / smiling faces, inline SVG.
+   kind values are unchanged so existing imports keep working. */
 
 export type CreatureKind = "grey" | "orange" | "chick" | "dog";
 
-const INK = "#2B2B2B";
+const INK = "#111111";
 
-/** Tall grey blob (screens 3, 5, 7). */
-export function GreyBlob({ size = 96, className }: { size?: number; className?: string }) {
+type CloudProps = { size?: number; className?: string };
+
+/** Shared cloud body built from circles + a rounded base, no outlines. */
+function CloudBody({ fill, sparkle }: { fill: string; sparkle?: boolean }) {
   return (
-    <svg width={size} height={size * 1.28} viewBox="0 0 100 128" className={className} role="img" aria-label="Grey blob creature">
-      {/* feet */}
-      <ellipse cx="34" cy="120" rx="11" ry="6" fill="#9AA7B0" stroke={INK} strokeWidth="3.5" />
-      <ellipse cx="66" cy="120" rx="11" ry="6" fill="#9AA7B0" stroke={INK} strokeWidth="3.5" />
-      {/* tall body */}
-      <path
-        d="M50 6 C74 6 87 28 87 62 C87 96 71 114 50 114 C29 114 13 96 13 62 C13 28 26 6 50 6 Z"
-        fill="#B0BEC5"
-        stroke={INK}
-        strokeWidth="4"
-      />
-      {/* arms */}
-      <path d="M15 74 Q7 82 13 90" fill="none" stroke={INK} strokeWidth="3.5" strokeLinecap="round" />
-      <path d="M85 74 Q93 82 87 90" fill="none" stroke={INK} strokeWidth="3.5" strokeLinecap="round" />
-      {/* dot eyes */}
-      <circle cx="38" cy="52" r="5" fill={INK} />
-      <circle cx="62" cy="52" r="5" fill={INK} />
-      {/* smile */}
-      <path d="M42 68 Q50 75 58 68" fill="none" stroke={INK} strokeWidth="3.5" strokeLinecap="round" />
+    <g>
+      <circle cx="36" cy="60" r="20" fill={fill} />
+      <circle cx="60" cy="46" r="24" fill={fill} />
+      <circle cx="84" cy="60" r="19" fill={fill} />
+      <rect x="28" y="52" width="68" height="30" rx="15" fill={fill} />
+      {sparkle && (
+        <g fill="#FFFFFF" opacity="0.85">
+          <path d="M92 30 l2.2 5.6 5.6 2.2 -5.6 2.2 -2.2 5.6 -2.2 -5.6 -5.6 -2.2 5.6 -2.2 z" />
+          <path d="M24 34 l1.6 4 4 1.6 -4 1.6 -1.6 4 -1.6 -4 -4 -1.6 4 -1.6 z" />
+        </g>
+      )}
+    </g>
+  );
+}
+
+/** Happy closed eyes (two arcs) + smile, drawn in ink. */
+function HappyFace() {
+  return (
+    <g stroke={INK} strokeWidth="3.5" strokeLinecap="round" fill="none">
+      <path d="M44 62 q6 7 12 0" />
+      <path d="M64 62 q6 7 12 0" />
+      <path d="M52 74 q8 8 16 0" />
+    </g>
+  );
+}
+
+/** Dot eyes + smile. */
+function DotFace() {
+  return (
+    <g>
+      <circle cx="50" cy="60" r="4.5" fill={INK} />
+      <circle cx="70" cy="60" r="4.5" fill={INK} />
+      <path d="M52 72 q8 8 16 0" stroke={INK} strokeWidth="3.5" strokeLinecap="round" fill="none" />
+    </g>
+  );
+}
+
+/** Soft grey cloud — calm, neutral. */
+export function GreyBlob({ size = 96, className }: CloudProps) {
+  return (
+    <svg width={size} height={size * 0.85} viewBox="0 0 120 102" className={className} role="img" aria-label="Grey cloud creature">
+      <CloudBody fill="#E4E7EC" />
+      <HappyFace />
     </svg>
   );
 }
 
-/** Round orange blob (screens 3, 4, 5). */
-export function OrangeBlob({ size = 96, className }: { size?: number; className?: string }) {
+/** Warm tangerine cloud — cheerful. */
+export function OrangeBlob({ size = 96, className }: CloudProps) {
   return (
-    <svg width={size} height={size} viewBox="0 0 120 112" className={className} role="img" aria-label="Orange blob creature">
-      {/* body */}
-      <ellipse cx="60" cy="60" rx="46" ry="40" fill="#FF9800" stroke={INK} strokeWidth="4" />
-      {/* head nub */}
-      <path d="M50 24 Q52 12 60 18 Q68 12 70 24" fill="#FF9800" stroke={INK} strokeWidth="3.5" strokeLinejoin="round" />
-      {/* dot eyes */}
-      <circle cx="44" cy="54" r="5.5" fill={INK} />
-      <circle cx="76" cy="54" r="5.5" fill={INK} />
-      {/* smile */}
-      <path d="M48 70 Q60 80 72 70" fill="none" stroke={INK} strokeWidth="3.5" strokeLinecap="round" />
-      {/* stubby arms */}
-      <path d="M16 62 Q8 66 12 74" fill="none" stroke={INK} strokeWidth="3.5" strokeLinecap="round" />
-      <path d="M104 62 Q112 66 108 74" fill="none" stroke={INK} strokeWidth="3.5" strokeLinecap="round" />
+    <svg width={size} height={size * 0.85} viewBox="0 0 120 102" className={className} role="img" aria-label="Orange cloud creature">
+      <CloudBody fill="#FFC98A" sparkle />
+      <DotFace />
     </svg>
   );
 }
 
-/** Yellow chick (screens 3, 5, 7). */
-export function YellowChick({ size = 96, className }: { size?: number; className?: string }) {
+/** Sun-yellow cloud — the hero mascot. */
+export function YellowChick({ size = 96, className }: CloudProps) {
   return (
-    <svg width={size} height={size} viewBox="0 0 120 112" className={className} role="img" aria-label="Yellow chick creature">
-      {/* wings behind */}
-      <ellipse cx="20" cy="66" rx="10" ry="17" fill="#FFEB3B" stroke={INK} strokeWidth="3.5" transform="rotate(-18 20 66)" />
-      <ellipse cx="100" cy="66" rx="10" ry="17" fill="#FFEB3B" stroke={INK} strokeWidth="3.5" transform="rotate(18 100 66)" />
-      {/* body */}
-      <ellipse cx="60" cy="60" rx="42" ry="38" fill="#FFEB3B" stroke={INK} strokeWidth="4" />
-      {/* head tuft */}
-      <path d="M54 24 Q56 12 62 20 Q68 12 68 24" fill="none" stroke={INK} strokeWidth="3.5" strokeLinecap="round" />
-      {/* dot eyes */}
-      <circle cx="44" cy="50" r="5" fill={INK} />
-      <circle cx="76" cy="50" r="5" fill={INK} />
-      {/* beak */}
-      <path d="M52 60 L68 60 L60 71 Z" fill="#FF9800" stroke={INK} strokeWidth="3" strokeLinejoin="round" />
-      {/* feet */}
-      <path d="M48 96 l-4 6 M52 96 l0 7 M68 96 l0 7 M72 96 l4 6" stroke={INK} strokeWidth="3" strokeLinecap="round" />
+    <svg width={size} height={size * 0.85} viewBox="0 0 120 102" className={className} role="img" aria-label="Yellow cloud creature">
+      <CloudBody fill="#FFD93D" sparkle />
+      <HappyFace />
     </svg>
   );
 }
 
-/** White spotted dog (screens 2, 3, 5, 7). */
-export function SpottedDog({ size = 96, className }: { size?: number; className?: string }) {
+/** Sky-blue cloud — friendly. */
+export function SpottedDog({ size = 96, className }: CloudProps) {
   return (
-    <svg width={size} height={size * 0.92} viewBox="0 0 132 120" className={className} role="img" aria-label="Spotted dog creature">
-      {/* floppy ears behind */}
-      <ellipse cx="24" cy="46" rx="12" ry="20" fill="#FFFFFF" stroke={INK} strokeWidth="3.5" transform="rotate(-18 24 46)" />
-      <ellipse cx="108" cy="46" rx="12" ry="20" fill="#FFFFFF" stroke={INK} strokeWidth="3.5" transform="rotate(18 108 46)" />
-      {/* body */}
-      <ellipse cx="66" cy="64" rx="44" ry="38" fill="#FFFFFF" stroke={INK} strokeWidth="4" />
-      {/* spots */}
-      <circle cx="44" cy="50" r="9" fill={INK} />
-      <circle cx="90" cy="74" r="11" fill={INK} />
-      <circle cx="72" cy="40" r="5.5" fill={INK} />
-      <circle cx="34" cy="80" r="4.5" fill={INK} />
-      {/* dot eyes */}
-      <circle cx="54" cy="60" r="5" fill={INK} />
-      <circle cx="80" cy="60" r="5" fill={INK} />
-      {/* nose + mouth */}
-      <ellipse cx="67" cy="74" rx="7" ry="5.5" fill={INK} />
-      <path d="M67 79 Q67 86 60 88 M67 79 Q67 86 74 88" fill="none" stroke={INK} strokeWidth="3" strokeLinecap="round" />
+    <svg width={size} height={size * 0.85} viewBox="0 0 120 102" className={className} role="img" aria-label="Blue cloud creature">
+      <CloudBody fill="#BFE3FF" sparkle />
+      <HappyFace />
     </svg>
   );
 }
 
-const MAP: Record<CreatureKind, (p: { size?: number; className?: string }) => JSX.Element> = {
+const MAP: Record<CreatureKind, (p: CloudProps) => JSX.Element> = {
   grey: GreyBlob,
   orange: OrangeBlob,
   chick: YellowChick,

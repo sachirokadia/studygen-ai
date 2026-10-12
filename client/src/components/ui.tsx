@@ -4,29 +4,25 @@ import clsx from "clsx";
 import Creature, { type CreatureKind } from "./creatures";
 
 export function Spinner({ className }: { className?: string }) {
-  return <Loader2 className={clsx("animate-spin text-ink", className ?? "h-6 w-6")} />;
+  return <Loader2 className={clsx("animate-spin text-muted", className ?? "h-6 w-6")} />;
 }
 
 export function LoadingState({ label }: { label?: string }) {
   return (
-    <div className="flex flex-col items-center justify-center gap-3 py-16">
-      <GreyCreature size={72} />
-      <p className="font-display text-2xl font-extrabold uppercase tracking-wide text-ink/70">{label ?? "One sec…"}</p>
+    <div className="flex flex-col items-center justify-center gap-3 py-16 text-center">
+      <Creature kind="grey" size={72} className="animate-float" />
+      <p className="text-sm font-bold text-muted">{label ?? "One sec…"}</p>
     </div>
   );
-}
-
-function GreyCreature({ size }: { size: number }) {
-  return <Creature kind="grey" size={size} className="animate-bob" />;
 }
 
 export function ErrorState({ message, onRetry, retryLabel }: { message?: string; onRetry?: () => void; retryLabel?: string }) {
   return (
     <div className="flex flex-col items-center justify-center gap-3 py-16 text-center">
-      <Creature kind="grey" size={72} className="animate-bob" />
-      <p className="font-display text-2xl font-extrabold uppercase tracking-wide text-ink/70">{message ?? "Oops! Something went wrong. Try again!"}</p>
+      <Creature kind="grey" size={72} className="animate-float" />
+      <p className="max-w-sm text-[15px] font-bold text-muted">{message ?? "Oops! Something went wrong. Try again!"}</p>
       {onRetry && (
-        <button className="btn-pink btn-sm" onClick={onRetry}>
+        <button className="btn-soft btn-sm mt-1" onClick={onRetry}>
           {retryLabel ?? "Try again"}
         </button>
       )}
@@ -47,9 +43,9 @@ export function EmptyState({
 }) {
   return (
     <div className="flex flex-col items-center justify-center gap-2 py-16 text-center">
-      <Creature kind={creature} size={88} className="animate-bob" />
-      <p className="font-display text-3xl font-extrabold uppercase tracking-wide text-ink">{title}</p>
-      {hint && <p className="max-w-sm font-body text-sm font-bold text-ink/60">{hint}</p>}
+      <Creature kind={creature} size={88} className="animate-float" />
+      <p className="text-xl font-extrabold tracking-tight text-ink">{title}</p>
+      {hint && <p className="max-w-sm text-sm font-medium text-muted">{hint}</p>}
       {action && <div className="mt-3">{action}</div>}
     </div>
   );
@@ -57,25 +53,29 @@ export function EmptyState({
 
 export function AiNotice({ message }: { message: string }) {
   return (
-    <div className="pill !bg-btnpink text-sm">
-      <span className="font-body font-bold normal-case tracking-normal">⚠ {message}</span>
+    <div className="inline-flex items-center gap-2 rounded-2xl bg-peach px-4 py-2.5 text-sm font-semibold text-ink">
+      <span aria-hidden="true">⚠</span>
+      {message}
     </div>
   );
 }
 
 interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
-  variant?: "primary" | "secondary" | "danger" | "blue" | "yellow" | "pink" | "cream" | "green";
+  variant?: "primary" | "dark" | "accent" | "soft" | "secondary" | "danger" | "blue" | "yellow" | "pink" | "cream" | "green";
 }
 
 const VARIANT_CLS: Record<NonNullable<ButtonProps["variant"]>, string> = {
-  primary: "btn-blue",
-  secondary: "btn-cream",
-  danger: "btn-pink",
-  blue: "btn-blue",
-  yellow: "btn-yellow",
-  pink: "btn-pink",
-  cream: "btn-cream",
-  green: "btn-green",
+  primary: "btn-primary",
+  dark: "btn-dark",
+  accent: "btn-accent",
+  soft: "btn-soft",
+  secondary: "btn-soft",
+  danger: "btn-berry",
+  blue: "btn-skyblue",
+  yellow: "btn-sun",
+  pink: "btn-rose",
+  cream: "btn-white",
+  green: "btn-mint",
 };
 
 export function Button({ variant = "primary", className, ...rest }: ButtonProps) {
@@ -83,7 +83,7 @@ export function Button({ variant = "primary", className, ...rest }: ButtonProps)
 }
 
 export function Card({ className, children, alt }: { className?: string; children: ReactNode; alt?: boolean }) {
-  return <div className={clsx(alt ? "paper-card-alt" : "paper-card", "p-5", className)}>{children}</div>;
+  return <div className={clsx(alt ? "card-alt" : "card", "p-5", className)}>{children}</div>;
 }
 
 export function Field({ label, children }: { label: string; children: ReactNode }) {
@@ -95,30 +95,55 @@ export function Field({ label, children }: { label: string; children: ReactNode 
   );
 }
 
+const INPUT_CLS =
+  "w-full rounded-2xl border border-[#ECECF1] bg-mist px-4 py-3 text-[15px] font-semibold text-ink outline-none transition placeholder:font-medium placeholder:text-muted/70 focus:border-tangerine focus:bg-white focus:ring-4 focus:ring-tangerine/20";
+
 export function TextInput(props: InputHTMLAttributes<HTMLInputElement>) {
-  return <input {...props} className={clsx("input", props.className)} />;
+  return <input {...props} className={clsx(INPUT_CLS, props.className)} />;
 }
 
 export function TextArea(props: TextareaHTMLAttributes<HTMLTextAreaElement>) {
-  return <textarea {...props} className={clsx("input min-h-[120px]", props.className)} />;
+  return <textarea {...props} className={clsx(INPUT_CLS, "min-h-[120px]", props.className)} />;
 }
 
-/** Soft white modal card. */
-export function Modal({ title, onClose, children }: { title: string; onClose: () => void; children: ReactNode }) {
+/** Bottom-sheet modal: overlay + sheet with grabber handle, gray X, big bold title. */
+export function Modal({
+  title,
+  subtitle,
+  onClose,
+  children,
+}: {
+  title: string;
+  subtitle?: string;
+  onClose: () => void;
+  children: ReactNode;
+}) {
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-ink/40 p-4 backdrop-blur-[2px]" onClick={onClose}>
-      <div className="machine max-h-[90vh] w-full max-w-lg overflow-y-auto p-5 md:p-6" onClick={(e) => e.stopPropagation()}>
-        <div className="mb-4 flex items-center justify-between gap-3">
-          <h2 className="font-display text-2xl font-extrabold text-ink">{title}</h2>
+    <div
+      className="fixed inset-0 z-50 flex items-end justify-center bg-ink/45 backdrop-blur-[2px]"
+      onClick={onClose}
+    >
+      <div
+        className="sheet"
+        onClick={(e) => e.stopPropagation()}
+        role="dialog"
+        aria-modal="true"
+        aria-label={title}
+      >
+        <div className="mb-4 flex items-start justify-between gap-3">
+          <div className="min-w-0">
+            <h2 className="text-xl font-extrabold tracking-tight text-ink">{title}</h2>
+            {subtitle && <p className="mt-1 text-sm font-medium text-muted">{subtitle}</p>}
+          </div>
           <button
             onClick={onClose}
-            className="icon-round !bg-blush !text-playpink"
+            className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-mist text-muted transition active:scale-95"
             aria-label="Close"
           >
-            <X className="h-5 w-5" strokeWidth={3} />
+            <X className="h-5 w-5" strokeWidth={2.5} />
           </button>
         </div>
-        <div className="font-body text-ink">{children}</div>
+        <div className="text-ink">{children}</div>
       </div>
     </div>
   );
@@ -127,64 +152,32 @@ export function Modal({ title, onClose, children }: { title: string; onClose: ()
 export function PageHeader({ title, action, light }: { title: string; action?: ReactNode; light?: boolean }) {
   return (
     <div className="mb-6 flex flex-wrap items-center justify-between gap-3">
-      <h1 className={light ? "title-chunky-light" : "title-chunky"}>{title}</h1>
+      <h1 className={clsx("text-[28px] font-extrabold leading-tight tracking-tight md:text-4xl", light ? "text-white" : "text-ink")}>
+        {title}
+      </h1>
       {action}
     </div>
   );
 }
 
-/** Rectangular hanging tag (labels like "3 LEFT"). */
-export function HangTag({ children, color = "bg-btnyellow", className }: { children: ReactNode; color?: string; className?: string }) {
+/** Small pill tag. */
+export function Pill({ children, color = "bg-mist", className }: { children: ReactNode; color?: string; className?: string }) {
   return (
-    <span className={clsx("inline-flex items-center gap-1.5 border-[2.5px] border-ink px-3 py-1 font-display text-base font-extrabold uppercase tracking-wide", color, className)}
-      style={{ borderRadius: "8px", boxShadow: "2px 2px 0 #2B2B2B" }}>
+    <span className={clsx("inline-flex items-center gap-1 rounded-full px-3 py-1 text-xs font-bold text-ink", color, className)}>
       {children}
     </span>
   );
 }
 
-/** Small pill tag (10 MIN / 12 FRIENDS). */
-export function Pill({ children, color = "bg-btnyellow", className }: { children: ReactNode; color?: string; className?: string }) {
-  return <span className={clsx("pill", color, className)}>{children}</span>;
-}
-
-/** Circular tag that hangs on a chain. */
-export function HangCircle({ children, color = "bg-btnyellow", active, className, title }: {
-  children: ReactNode; color?: string; active?: boolean; className?: string; title?: string;
-}) {
-  return (
-    <span title={title} className={clsx("hang-circle", color, active && "hang-circle-active", className)}>
-      {children}
-    </span>
-  );
-}
-
-/** Metal chain divider. */
-export function Chain({ className }: { className?: string }) {
-  return <div className={clsx("chain-metal", className)} aria-hidden="true" />;
-}
-
-/** Full-page background. variant: sky (sky+grass split) | grass | night | deep */
-export function Screen({ variant = "sky", children, className }: {
-  variant?: "sky" | "grass" | "night" | "deep";
-  children: ReactNode;
-  className?: string;
-}) {
-  const bg = variant === "sky" ? "screen-sky" : variant === "grass" ? "screen-grass" : variant === "night" ? "screen-night" : "screen-deep";
-  return <div className={clsx("min-h-screen", bg, className)}>{children}</div>;
-}
-
-/** Fixed full-viewport background behind the Layout (pages render inside Layout's main). */
+/** Fixed pastel gradient wash behind the Layout. variant is kept for API compatibility — all values render the same wash. */
 export function PageBg({ variant = "sky" }: { variant?: "sky" | "grass" | "night" | "deep" }) {
-  const bg = variant === "sky" ? "screen-sky" : variant === "grass" ? "screen-grass" : variant === "night" ? "screen-night" : "screen-deep";
-  return <div aria-hidden="true" className={clsx("fixed inset-0 -z-10", bg)} />;
+  return <div aria-hidden="true" data-variant={variant} className="page-bg" />;
 }
 
-/** Sticker badge. */
-export function Sticker({ children, color = "bg-btnyellow", className }: { children: ReactNode; color?: string; className?: string }) {
+/** Soft badge. */
+export function Sticker({ children, color = "bg-sun", className }: { children: ReactNode; color?: string; className?: string }) {
   return (
-    <span className={clsx("inline-flex items-center gap-1 border-[2.5px] border-ink px-2.5 py-0.5 font-display text-base font-extrabold uppercase", color, className)}
-      style={{ borderRadius: "999px", boxShadow: "2px 2px 0 #2B2B2B" }}>
+    <span className={clsx("inline-flex items-center gap-1 rounded-full px-3 py-1 text-xs font-extrabold uppercase tracking-wide text-ink", color, className)}>
       {children}
     </span>
   );

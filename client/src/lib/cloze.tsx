@@ -44,13 +44,13 @@ export function ClozeText({ text, revealed }: { text: string; revealed: boolean 
       {parts.map((p, i) =>
         p.hidden ? (
           revealed ? (
-            <span key={i} className="rounded bg-btnyellow px-1 font-extrabold">
+            <span key={i} className="rounded bg-peach px-1 font-extrabold">
               {p.text}
             </span>
           ) : (
             <span
               key={i}
-              className="mx-1 inline-block min-w-[3.5rem] border-b-[3px] border-dashed border-ink/60 text-center font-extrabold text-ink/40"
+              className="mx-1 inline-block min-w-[3.5rem] border-b-[3px] border-dashed border-muted/60 text-center font-extrabold text-muted/60"
             >
               &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
             </span>

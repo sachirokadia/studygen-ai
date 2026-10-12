@@ -2,264 +2,205 @@
 @tailwind components;
 @tailwind utilities;
 
-/* ============ Playful reskin design system (approved demo) ============
-   Soft pastel backgrounds, white cards with big rounded corners and soft
-   shadows, vibrant accents, chunky pill buttons, rounded-sans type
-   (Baloo 2 headings + Nunito body). Inspired by the reference collage —
-   not a copy. Kid-simple, friendly, no harsh outlines. */
+/* ============ StudyGen design system ============
+   Soft playful language: pastel gradient page wash, white cards with big
+   rounded corners and soft shadows, pill buttons, orange→pink gradient CTAs,
+   Plus Jakarta Sans type. No hand-drawn / doodle styling. */
 
 body {
-  @apply bg-cream font-body text-ink antialiased;
+  @apply font-sans text-ink antialiased;
+  background: linear-gradient(180deg, #f6f4ff 0%, #fff8f0 100%);
+  background-attachment: fixed;
+  min-height: 100vh;
 }
 
 @layer components {
-  /* ---------- Full-screen backgrounds (soft pastels) ---------- */
-  .screen-sky {
-    background:
-      radial-gradient(#8b5cf614 1.6px, transparent 1.6px),
-      linear-gradient(to bottom, #e2f1fd 0%, #fff9f3 55%);
-    background-size: 26px 26px, 100% 100%;
-  }
-  .screen-grass {
-    background:
-      radial-gradient(#4ade8022 1.6px, transparent 1.6px),
-      linear-gradient(to bottom, #dff9e4 0%, #fff9f3 55%);
-    background-size: 26px 26px, 100% 100%;
-  }
-  .screen-night {
-    background:
-      radial-gradient(#ff6b9d18 1.6px, transparent 1.6px),
-      linear-gradient(to bottom, #efe9ff 0%, #ffe9f1 55%, #fff9f3 100%);
-    background-size: 26px 26px, 100% 100%;
-  }
-  .screen-deep {
-    background:
-      radial-gradient(#ff9f431f 1.6px, transparent 1.6px),
-      linear-gradient(to bottom, #fff0dc 0%, #fff9f3 55%);
-    background-size: 26px 26px, 100% 100%;
+  /* ---------- Fixed pastel page wash (behind Layout) ---------- */
+  input, textarea, select { color-scheme: light; }
+
+  .page-bg {
+    @apply fixed inset-0 -z-10;
+    background: linear-gradient(180deg, #f6f4ff 0%, #fff8f0 100%);
   }
 
-  /* ---------- Soft white card ---------- */
-  .paper-card {
-    @apply bg-white;
-    border-radius: 24px;
-    box-shadow: 0 12px 32px -12px rgba(90, 70, 130, 0.18);
-  }
-  .paper-card-alt {
-    background: linear-gradient(135deg, #efe9ff 0%, #ffe9f1 100%);
-    border-radius: 24px;
-    box-shadow: 0 12px 32px -12px rgba(90, 70, 130, 0.18);
+  /* ---------- Shared button base ---------- */
+  .btn-base {
+    @apply inline-flex cursor-pointer select-none items-center justify-center gap-2 rounded-full font-bold leading-none transition active:scale-[0.97] disabled:cursor-not-allowed disabled:opacity-50;
   }
 
-  /* ---------- Chunky pill buttons ---------- */
-  .btn-chunky {
-    @apply inline-flex cursor-pointer select-none items-center justify-center gap-2 px-6 py-3 font-display text-lg font-extrabold leading-none transition active:scale-95 disabled:cursor-not-allowed disabled:opacity-50;
-    border-radius: 999px;
-    box-shadow: 0 8px 20px -8px rgba(43, 43, 43, 0.4);
+  /* ---------- Primary CTA: orange → pink gradient pill ---------- */
+  .btn-primary {
+    @apply btn-base h-[52px] w-full px-6 text-[15px] font-extrabold text-white;
+    background: linear-gradient(135deg, #ffa94d 0%, #ff5fa2 100%);
+    box-shadow: 0 10px 28px -6px rgba(255, 95, 162, 0.55), 0 6px 18px -6px rgba(255, 169, 77, 0.5);
   }
-  .btn-blue { @apply btn-chunky bg-playblue text-white; }
-  .btn-yellow { @apply btn-chunky bg-playyellow text-ink; }
-  .btn-pink { @apply btn-chunky bg-playpink text-white; }
-  .btn-cream {
-    @apply btn-chunky bg-white text-ink;
-    border: 2px solid #f0e4d2;
-    box-shadow: 0 8px 20px -10px rgba(43, 43, 43, 0.25);
+  .btn-dark {
+    @apply btn-base bg-ink px-6 py-3 text-[15px] font-extrabold text-white;
+    box-shadow: 0 10px 24px -10px rgba(17, 17, 17, 0.5);
   }
-  .btn-green { @apply btn-chunky bg-playgreen text-ink; }
-  .btn-gradient {
-    @apply btn-chunky text-white;
-    background: linear-gradient(135deg, #ff6b9d 0%, #8b5cf6 100%);
-    box-shadow: 0 10px 24px -8px rgba(255, 107, 157, 0.6);
+  .btn-accent {
+    @apply btn-base bg-amber px-6 py-3 text-[15px] font-extrabold text-white;
+    box-shadow: 0 10px 24px -8px rgba(255, 163, 26, 0.6);
+  }
+  .btn-soft {
+    @apply btn-base bg-mist px-6 py-3 text-[15px] font-extrabold text-ink;
+  }
+
+  /* ---------- Legacy variant aliases (new language, old prop names) ---------- */
+  .btn-berry {
+    @apply btn-base bg-berry px-6 py-3 text-[15px] font-extrabold text-white;
+    box-shadow: 0 10px 24px -8px rgba(255, 77, 109, 0.55);
+  }
+  .btn-skyblue {
+    @apply btn-base bg-skyblue px-6 py-3 text-[15px] font-extrabold text-white;
+    box-shadow: 0 10px 24px -8px rgba(56, 189, 248, 0.55);
+  }
+  .btn-sun {
+    @apply btn-base bg-sun px-6 py-3 text-[15px] font-extrabold text-ink;
+    box-shadow: 0 10px 24px -8px rgba(255, 217, 61, 0.6);
+  }
+  .btn-rose {
+    @apply btn-base bg-pinkpop px-6 py-3 text-[15px] font-extrabold text-white;
+    box-shadow: 0 10px 24px -8px rgba(255, 95, 162, 0.55);
+  }
+  .btn-white {
+    @apply btn-base border border-[#ECECF1] bg-white px-6 py-3 text-[15px] font-extrabold text-ink;
+    box-shadow: 0 8px 20px -10px rgba(120, 100, 200, 0.25);
+  }
+  .btn-mint {
+    @apply btn-base bg-mint px-6 py-3 text-[15px] font-extrabold text-ink;
   }
   .btn-sm {
     @apply px-4 py-2 text-sm;
   }
 
-  /* ---------- Soft pill tags ---------- */
-  .pill {
-    @apply inline-flex items-center gap-1 bg-butter px-3 py-1 font-display text-sm font-extrabold leading-tight text-ink;
-    border-radius: 999px;
+  /* ---------- Cards & tiles ---------- */
+  .card {
+    @apply rounded-[24px] bg-white;
+    box-shadow: 0 8px 30px rgba(120, 100, 200, 0.1);
   }
-
-  /* ---------- Tinted boards (soft) ---------- */
-  .board-brown {
-    @apply bg-peach;
-    border-radius: 24px;
-    box-shadow: 0 12px 32px -12px rgba(90, 70, 130, 0.18);
+  .card-alt {
+    @apply rounded-[24px];
+    background: linear-gradient(135deg, #efe9ff 0%, #fff1d6 100%);
+    box-shadow: 0 8px 30px rgba(120, 100, 200, 0.1);
   }
-  .board-red {
-    @apply bg-blush;
-    border-radius: 24px;
-    box-shadow: 0 12px 32px -12px rgba(90, 70, 130, 0.18);
+  .tile {
+    @apply rounded-[18px] bg-mist;
   }
-  .board-cream {
-    @apply bg-white;
-    border-radius: 24px;
-    box-shadow: 0 12px 32px -12px rgba(90, 70, 130, 0.18);
-  }
-
-  /* ---------- Metal chain (retired — kept as no-op for safety) ---------- */
-  .chain-metal {
-    display: none;
-  }
-
-  /* ---------- Soft circular icon button ---------- */
-  .hang-circle {
-    @apply relative flex h-14 w-14 shrink-0 items-center justify-center rounded-full text-white transition active:scale-95;
-    box-shadow: 0 8px 18px -8px rgba(43, 43, 43, 0.45);
-  }
-  .hang-circle-active {
-    outline: 3px solid #ffd54f;
-    outline-offset: 3px;
-  }
-
-  /* ---------- Date + XP pills (top bar) ---------- */
-  .date-tag {
-    @apply inline-flex items-center gap-1.5 rounded-full bg-white px-3.5 py-1.5 font-display text-sm font-extrabold text-ink;
-    box-shadow: 0 6px 16px -8px rgba(90, 70, 130, 0.25);
-  }
-  .wallet {
-    @apply inline-flex items-center gap-1.5 rounded-full bg-butter px-3.5 py-1.5 font-display text-sm font-extrabold text-ink;
-    box-shadow: 0 6px 16px -8px rgba(90, 70, 130, 0.25);
-  }
-
-  /* ---------- Round icon buttons ---------- */
-  .icon-round {
-    @apply flex h-11 w-11 items-center justify-center rounded-full bg-white text-ink transition active:scale-95;
-    box-shadow: 0 8px 18px -8px rgba(43, 43, 43, 0.35);
-  }
-
-  /* ---------- Bottom nav tiles ---------- */
-  .nav-tag {
-    @apply flex flex-col items-center justify-center gap-1 rounded-[20px] bg-white px-2 py-2.5 font-display text-[11px] font-extrabold leading-none text-ink/70 transition active:scale-95;
-    box-shadow: 0 8px 18px -10px rgba(90, 70, 130, 0.25);
-    min-width: 0;
-  }
-  .nav-tag-active {
-    @apply bg-butter text-ink;
-    box-shadow: 0 8px 18px -10px rgba(255, 159, 67, 0.5);
-  }
-
-  /* ---------- Washi tape strip (soft) ---------- */
-  .washi::before {
-    content: "";
-    position: absolute;
-    top: -12px;
-    left: 50%;
-    transform: translateX(-50%) rotate(-3deg);
-    width: 84px;
-    height: 24px;
-    background: #ffd54f66;
-    border-radius: 4px;
-  }
-
-  /* ---------- Inputs ---------- */
-  .input {
-    @apply w-full rounded-2xl border-2 border-creamdark bg-white px-4 py-2.5 font-body text-sm font-bold text-ink outline-none transition placeholder:font-semibold placeholder:text-ink/35 focus:border-playpink;
-    box-shadow: 0 4px 12px -6px rgba(90, 70, 130, 0.15);
-  }
-  .input:focus {
-    box-shadow: 0 0 0 4px rgba(255, 107, 157, 0.15);
-  }
-  .label {
-    @apply mb-1.5 block font-display text-lg font-extrabold text-ink;
-  }
-
-  /* ---------- Section titles: friendly chunky, not shouty ---------- */
-  .title-chunky {
-    @apply font-display text-4xl font-extrabold leading-tight text-ink md:text-5xl;
-  }
-  .title-chunky-light {
-    @apply font-display text-4xl font-extrabold leading-tight text-ink md:text-5xl;
-  }
-
-  /* ---------- Modal card (soft white) ---------- */
-  .machine {
-    @apply bg-white;
-    border-radius: 28px;
-    box-shadow: 0 24px 60px -12px rgba(90, 70, 130, 0.3);
-    animation: pop-in 0.25s ease-out;
-  }
-  .machine-slot {
-    @apply rounded-2xl border-[3px] border-dashed border-ink/15 bg-cream;
-  }
-
-  /* ---------- Dashed input area ---------- */
-  .input-dashed {
-    @apply w-full rounded-2xl border-[3px] border-dashed border-ink/20 bg-cream px-4 py-2.5 font-body text-sm font-bold text-ink outline-none placeholder:text-ink/35 focus:border-playpink;
-  }
-
-  /* ---------- Daily check-in stat tile ---------- */
   .stat-tile {
-    border-radius: 24px;
-    box-shadow: 0 10px 24px -12px rgba(90, 70, 130, 0.2);
+    @apply rounded-[20px] bg-mist p-4;
   }
 
-  /* ---------- Selectable source tab card (Create-a-Pack modal) ---------- */
-  .tab-card {
-    @apply flex w-full flex-col items-center gap-1.5 rounded-[20px] border-[3px] border-transparent bg-white px-2 py-3.5 font-display text-sm font-extrabold text-ink/70 transition active:scale-95;
-    box-shadow: 0 8px 18px -10px rgba(90, 70, 130, 0.25);
+  /* ---------- Bottom sheet ---------- */
+  .sheet {
+    @apply relative mx-auto max-h-[88vh] w-full max-w-lg overflow-y-auto rounded-t-[28px] bg-white px-5 pb-8 pt-3;
+    box-shadow: 0 -12px 48px -12px rgba(120, 100, 200, 0.3);
+    animation: sheet-up 0.28s cubic-bezier(0.32, 0.72, 0.35, 1);
   }
-  .tab-card-active {
-    border-color: currentColor;
-    @apply text-ink;
-    box-shadow: 0 10px 22px -10px rgba(90, 70, 130, 0.35);
+  .sheet::before {
+    content: "";
+    @apply mx-auto mb-3 block h-1.5 w-12 rounded-full bg-mist;
+  }
+
+  /* ---------- Chips & segmented tabs ---------- */
+  .chip {
+    @apply inline-flex items-center gap-1.5 rounded-full bg-mist px-3 py-1 text-xs font-bold text-ink;
+  }
+  .seg {
+    @apply flex rounded-full bg-mist p-1;
+  }
+  .seg-tab {
+    @apply flex-1 rounded-full px-4 py-2 text-sm font-bold text-muted transition active:scale-[0.98];
+  }
+  .seg-tab-active {
+    @apply bg-white text-ink;
+    box-shadow: 0 4px 14px -4px rgba(120, 100, 200, 0.3);
+  }
+
+  /* ---------- iOS-style toggle (orange when on) ---------- */
+  .toggle {
+    @apply relative h-7 w-[52px] shrink-0 cursor-pointer appearance-none rounded-full bg-mist outline-none transition-colors duration-200;
+  }
+  .toggle::after {
+    content: "";
+    @apply absolute left-1 top-1 h-5 w-5 rounded-full bg-white transition-transform duration-200;
+    box-shadow: 0 2px 6px rgba(17, 17, 17, 0.25);
+  }
+  .toggle:checked {
+    @apply bg-tangerine;
+  }
+  .toggle:checked::after {
+    transform: translateX(24px);
   }
 
   /* ---------- Progress bar ---------- */
   .progress-track {
-    @apply h-3.5 w-full overflow-hidden rounded-full bg-ink/10;
+    @apply h-3 w-full overflow-hidden rounded-full bg-mist;
   }
   .progress-fill {
-    background: linear-gradient(90deg, #ff6b9d, #8b5cf6);
     @apply h-full rounded-full transition-all duration-500;
+    background: linear-gradient(90deg, #ffa94d, #ff5fa2);
   }
 
-  /* ---------- Week streak dots ---------- */
-  .week-dot {
-    @apply flex h-11 w-11 flex-col items-center justify-center rounded-full bg-white font-display text-sm font-extrabold text-ink/50;
-    box-shadow: 0 6px 14px -8px rgba(90, 70, 130, 0.3);
+  /* ---------- Day strip (Sun–Thu check-in) ---------- */
+  .day-strip {
+    @apply flex gap-2;
   }
-  .week-dot-today {
-    @apply bg-playyellow text-ink;
-    box-shadow: 0 8px 18px -8px rgba(255, 159, 67, 0.7);
-    transform: scale(1.12);
+  .day-cell {
+    @apply flex h-14 w-12 flex-col items-center justify-center gap-0.5 rounded-2xl bg-white text-[11px] font-bold text-muted;
+    box-shadow: 0 8px 30px rgba(120, 100, 200, 0.1);
+  }
+  .day-cell-active {
+    @apply bg-tangerine text-white;
+    box-shadow: 0 10px 24px -8px rgba(255, 169, 77, 0.7);
   }
 
-  /* ---------- Flashcard flip ---------- */
-  .flip-card {
-    transition: transform 0.25s ease;
+  /* ---------- Round icon button ---------- */
+  .icon-btn {
+    @apply flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-white text-ink transition active:scale-95;
+    box-shadow: 0 8px 18px -8px rgba(120, 100, 200, 0.35);
   }
-  .flip-card:active {
-    transform: scale(0.98);
+
+  /* ---------- Inputs ---------- */
+  .input {
+    @apply w-full rounded-2xl border border-[#ECECF1] bg-mist px-4 py-2.5 text-sm font-semibold text-ink outline-none transition placeholder:font-medium placeholder:text-muted/70 focus:border-tangerine focus:bg-white;
+  }
+  .input:focus {
+    box-shadow: 0 0 0 4px rgba(255, 169, 77, 0.18);
+  }
+  .label {
+    @apply mb-1.5 block text-sm font-bold text-ink;
   }
 }
 
-/* Bobbing animation for creatures */
-@keyframes creature-bob {
+/* ---------- Keyframes ---------- */
+@keyframes fade-up {
+  from { opacity: 0; transform: translateY(12px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+.animate-fade-up {
+  animation: fade-up 0.35s ease-out both;
+}
+
+@keyframes float {
   0%, 100% { transform: translateY(0); }
-  50% { transform: translateY(-6px); }
-}
-.animate-bob {
-  animation: creature-bob 3s ease-in-out infinite;
-}
-
-/* Pop-in for modals and cards */
-@keyframes pop-in {
-  0% { opacity: 0; transform: scale(0.95) translateY(8px); }
-  100% { opacity: 1; transform: scale(1) translateY(0); }
-}
-.animate-pop-in {
-  animation: pop-in 0.25s ease-out;
-}
-
-/* Gentle float for hero decorations */
-@keyframes float-soft {
-  0%, 100% { transform: translateY(0) rotate(0deg); }
-  50% { transform: translateY(-8px) rotate(2deg); }
+  50% { transform: translateY(-8px); }
 }
 .animate-float {
-  animation: float-soft 4s ease-in-out infinite;
+  animation: float 4s ease-in-out infinite;
+}
+
+@keyframes scale-tap {
+  0% { transform: scale(0.96); }
+  100% { transform: scale(1); }
+}
+.animate-scale-tap {
+  animation: scale-tap 0.15s ease-out;
+}
+
+@keyframes sheet-up {
+  from { transform: translateY(48px); opacity: 0.5; }
+  to { transform: translateY(0); opacity: 1; }
 }
 
 /* ---------- Print: clean Q/A sheet ---------- */
@@ -269,7 +210,7 @@ body {
   .print-sheet { max-width: 100% !important; }
   .print-card {
     break-inside: avoid;
-    border-bottom: 2px dashed #2b2b2b33;
+    border-bottom: 2px dashed #11111133;
     padding-bottom: 12px;
   }
 }
