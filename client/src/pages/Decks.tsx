@@ -50,11 +50,11 @@ function NewDeckModal({ onClose, onCreated }: { onClose: () => void; onCreated: 
 
   const activeTab: SourceTab = tab;
 
-  const tabs: { id: SourceTab; label: string; icon: typeof FileText }[] = [
-    { id: "topic", label: t("decks.tabTopic"), icon: Lightbulb },
-    { id: "pdf", label: t("decks.tabPdf"), icon: FileText },
-    { id: "youtube", label: t("decks.tabYoutube"), icon: Link2 },
-    { id: "text", label: t("decks.tabText"), icon: Type },
+  const tabs: { id: SourceTab; label: string; icon: typeof FileText; circle: string; tint: string; edge: string }[] = [
+    { id: "topic", label: t("decks.tabTopic"), icon: Lightbulb, circle: "bg-playpink", tint: "bg-blush", edge: "#FF6B9D" },
+    { id: "pdf", label: t("decks.tabPdf"), icon: FileText, circle: "bg-playblue", tint: "bg-ice", edge: "#5B9BD5" },
+    { id: "youtube", label: t("decks.tabYoutube"), icon: Link2, circle: "bg-playorange", tint: "bg-peach", edge: "#FF9F43" },
+    { id: "text", label: t("decks.tabText"), icon: Type, circle: "bg-playgreen", tint: "bg-mint", edge: "#4ADE80" },
   ];
 
   const handlePdf = async (file: File) => {
@@ -171,17 +171,23 @@ function NewDeckModal({ onClose, onCreated }: { onClose: () => void; onCreated: 
       <div className="space-y-4">
         {/* Fix 10: source tabs always visible, no "More options" gate. */}
         <div className="grid grid-cols-4 gap-2">
-          {tabs.map((tb) => (
-            <button key={tb.id} onClick={() => setTab(tb.id)} className="flex justify-center" type="button">
-              <Sticker
-                color={tab === tb.id ? "bg-btnyellow" : "bg-paper"}
-                className={clsx("flex-col !px-3 !py-2", tab !== tb.id && "opacity-60 hover:opacity-100")}
+          {tabs.map((tb) => {
+            const active = tab === tb.id;
+            return (
+              <button
+                key={tb.id}
+                onClick={() => setTab(tb.id)}
+                type="button"
+                className={clsx("tab-card", active && "tab-card-active", active && tb.tint)}
+                style={active ? { borderColor: tb.edge } : undefined}
               >
-                <tb.icon className="h-5 w-5" strokeWidth={2.75} />
+                <span className={clsx("flex h-10 w-10 items-center justify-center rounded-full text-white", tb.circle)}>
+                  <tb.icon className="h-5 w-5" strokeWidth={2.75} />
+                </span>
                 {tb.label}
-              </Sticker>
-            </button>
-          ))}
+              </button>
+            );
+          })}
         </div>
 
         {tab === "topic" && (
@@ -239,9 +245,9 @@ function NewDeckModal({ onClose, onCreated }: { onClose: () => void; onCreated: 
           <TextInput value={title} onChange={(e) => setTitle(e.target.value)} placeholder={topic || "Cell Biology 101"} />
         </Field>
 
-        <Button onClick={handleGenerate} disabled={!canGenerate} className="w-full !py-4 !text-2xl">
+        <button onClick={handleGenerate} disabled={!canGenerate} className="btn-gradient w-full !py-4 !text-2xl">
           {busy ? progress || t("decks.making") : t("decks.makeMyCards")}
-        </Button>
+        </button>
 
         <Button variant="cream" onClick={handleEmptyPack} disabled={busy} className="w-full !py-3 !text-xl">
           {t("decks.emptyPack")}
@@ -328,7 +334,14 @@ export default function Decks() {
         ) : decks.length > 0 ? (
           <div className="grid grid-cols-2 gap-3 md:grid-cols-3">
             {decks.map((deck, i) => (
-              <Link key={deck.id} to={`/decks/${deck.id}`} className="paper-card relative p-3 text-left">
+              <Link
+                key={deck.id}
+                to={`/decks/${deck.id}`}
+                className={clsx(
+                  "stat-tile relative block p-3 text-left transition active:scale-[0.98]",
+                  ["bg-blush", "bg-ice", "bg-butter", "bg-mint", "bg-lav", "bg-peach"][i % 6],
+                )}
+              >
                 <div className="flex items-start justify-between">
                   <span className="font-display text-base font-extrabold text-ink/50">
                     {String(i + 1).padStart(2, "0")}

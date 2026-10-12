@@ -3,7 +3,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useSearchParams } from "react-router-dom";
 import { api, type Flashcard } from "../lib/api";
 import { useLang } from "../lib/i18n";
-import { Button, Card, EmptyState, ErrorState, LoadingState, PageBg, PageHeader, Pill } from "../components/ui";
+import { Button, EmptyState, ErrorState, LoadingState, PageBg, PageHeader } from "../components/ui";
 import Creature, { type CreatureKind } from "../components/creatures";
 import { ClozeText, hasCloze, stripCloze } from "../lib/cloze";
 
@@ -77,9 +77,9 @@ export default function Review() {
       {!loaded || queue.length === 0 ? (
         <EmptyState title={t("review.empty")} creature="dog" />
       ) : done ? (
-        <Card className="washi relative text-center">
+        <div className="paper-card washi animate-pop-in relative p-8 text-center">
           <Creature kind="dog" size={104} className="mx-auto animate-bob" />
-          <h2 className="mt-3 font-display text-4xl font-extrabold uppercase">{t("review.allDone")}</h2>
+          <h2 className="mt-3 font-display text-4xl font-extrabold">{t("review.allDone")}</h2>
           <p className="mt-1 font-display text-2xl font-extrabold text-ink/60">
             {reviewed} {t("review.reviewed")}
           </p>
@@ -96,21 +96,31 @@ export default function Review() {
           >
             {t("btn.retry")}
           </Button>
-        </Card>
+        </div>
       ) : (
         card && (
           <div>
-            <div className="mb-4 flex items-center justify-center gap-4">
-              <Creature kind={mascot} size={80} className="animate-bob" />
-              <Pill color="bg-btnblue" className="!text-xl">
-                {index + 1} {t("review.of")} {queue.length}
-              </Pill>
+            <div className="mb-3 flex items-center justify-center gap-3">
+              <Creature kind={mascot} size={64} className="animate-bob" />
+              <div className="min-w-[180px] flex-1 sm:max-w-xs">
+                <div className="mb-1.5 flex items-center justify-between">
+                  <span className="font-display text-base font-extrabold text-ink/60">
+                    {t("review.title")}
+                  </span>
+                  <span className="font-display text-base font-extrabold text-ink">
+                    {index + 1} {t("review.of")} {queue.length}
+                  </span>
+                </div>
+                <div className="progress-track" role="progressbar" aria-valuenow={index + 1} aria-valuemax={queue.length}>
+                  <div className="progress-fill" style={{ width: `${((index + 1) / queue.length) * 100}%` }} />
+                </div>
+              </div>
             </div>
             <div
               onClick={() => setFlipped((f) => !f)}
-              className="paper-card mx-auto max-w-2xl rotate-[1.5deg] cursor-pointer p-8 text-center"
+              className="flip-card paper-card mx-auto max-w-2xl cursor-pointer !rounded-[28px] p-8 text-center"
             >
-              <div className="flex min-h-[200px] flex-col items-center justify-center text-center">
+              <div className="flex min-h-[220px] flex-col items-center justify-center text-center">
                 {!flipped ? (
                   <>
                     <p className="font-display text-3xl font-extrabold leading-snug">
@@ -120,7 +130,10 @@ export default function Review() {
                         card.front
                       )}
                     </p>
-                    <p className="mt-6 font-body text-sm font-bold text-ink/50">{t("review.tapToFlip")}</p>
+                    <p className="mt-6 inline-flex items-center gap-2 rounded-full bg-lav px-4 py-1.5 font-body text-sm font-bold text-ink/60">
+                      <span aria-hidden="true">👆</span>
+                      {t("review.tapToFlip")}
+                    </p>
                   </>
                 ) : (
                   <>
@@ -129,7 +142,7 @@ export default function Review() {
                         <ClozeText text={card.front} revealed={true} />
                       </p>
                     )}
-                    <p className="mt-4 font-body text-xl font-bold text-ink/80">
+                    <p className="mt-4 rounded-2xl bg-mint px-5 py-3 font-body text-xl font-bold text-ink/80">
                       {stripCloze(card.back)}
                     </p>
                   </>
@@ -138,27 +151,25 @@ export default function Review() {
             </div>
             {flipped && (
               <div className="mt-5 grid grid-cols-2 gap-4">
-                <Button
-                  variant="pink"
+                <button
                   onClick={() => handleGrade(false)}
                   disabled={gradeMut.isPending}
-                  className="!py-5 !text-2xl"
+                  className="btn-pink !py-5 !text-2xl"
                 >
                   {t("review.needPractice")}
-                </Button>
-                <Button
-                  variant="green"
+                </button>
+                <button
                   onClick={() => handleGrade(true)}
                   disabled={gradeMut.isPending}
-                  className="!py-5 !text-2xl"
+                  className="btn-green !py-5 !text-2xl"
                 >
                   {t("review.gotIt")}
-                </Button>
+                </button>
               </div>
             )}
             {gradeError && (
-              <div className="paper-card mt-4 border-btnpink p-4 text-center">
-                <p className="font-display text-xl font-extrabold uppercase">{t("review.saveFailed")}</p>
+              <div className="paper-card mt-4 !bg-blush p-4 text-center">
+                <p className="font-display text-xl font-extrabold">{t("review.saveFailed")}</p>
               </div>
             )}
           </div>

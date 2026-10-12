@@ -2,165 +2,145 @@
 @tailwind components;
 @tailwind utilities;
 
-/* ============ Exact-copy design system (from reference image) ============
-   Chunky rounded display type (Baloo 2), thick ink outlines, flat fills,
-   hard offset shadows, paper cards, metal chains, hanging tags. */
+/* ============ Playful reskin design system (approved demo) ============
+   Soft pastel backgrounds, white cards with big rounded corners and soft
+   shadows, vibrant accents, chunky pill buttons, rounded-sans type
+   (Baloo 2 headings + Nunito body). Inspired by the reference collage —
+   not a copy. Kid-simple, friendly, no harsh outlines. */
 
 body {
-  @apply bg-grass font-body text-ink antialiased;
+  @apply bg-cream font-body text-ink antialiased;
 }
 
 @layer components {
-  /* ---------- Full-screen backgrounds ---------- */
-  /* Sky top / grass bottom split (Screens 1, 3, 7) */
+  /* ---------- Full-screen backgrounds (soft pastels) ---------- */
   .screen-sky {
-    background: linear-gradient(to bottom, #a9cce3 0%, #a9cce3 44%, #8bc34a 44%, #8bc34a 100%);
+    background:
+      radial-gradient(#8b5cf614 1.6px, transparent 1.6px),
+      linear-gradient(to bottom, #e2f1fd 0%, #fff9f3 55%);
+    background-size: 26px 26px, 100% 100%;
   }
-  /* Full grass (Screen 5 landing) */
   .screen-grass {
-    background-color: #8bc34a;
-    background-image: radial-gradient(#6fa32f22 1.5px, transparent 1.5px);
-    background-size: 26px 26px;
+    background:
+      radial-gradient(#4ade8022 1.6px, transparent 1.6px),
+      linear-gradient(to bottom, #dff9e4 0%, #fff9f3 55%);
+    background-size: 26px 26px, 100% 100%;
   }
-  /* Night purple with stars (Screens 4, 8) */
   .screen-night {
-    background-color: #1e1b3a;
-    background-image:
-      radial-gradient(1.6px 1.6px at 10% 18%, #ffffffaa, transparent),
-      radial-gradient(1.2px 1.2px at 32% 8%, #ffffff88, transparent),
-      radial-gradient(2px 2px at 58% 22%, #ffffff66, transparent),
-      radial-gradient(1.4px 1.4px at 78% 12%, #ffffff99, transparent),
-      radial-gradient(1.8px 1.8px at 90% 34%, #ffffff77, transparent),
-      radial-gradient(1.2px 1.2px at 22% 44%, #ffffff66, transparent),
-      radial-gradient(1.5px 1.5px at 68% 52%, #ffffff55, transparent),
-      radial-gradient(1px 1px at 44% 66%, #ffffff66, transparent);
+    background:
+      radial-gradient(#ff6b9d18 1.6px, transparent 1.6px),
+      linear-gradient(to bottom, #efe9ff 0%, #ffe9f1 55%, #fff9f3 100%);
+    background-size: 26px 26px, 100% 100%;
   }
-  /* Dark green (Screen 6 NEW JOB backdrop) */
   .screen-deep {
-    background-color: #152412;
-    background-image: radial-gradient(#ffffff10 1.5px, transparent 1.5px);
-    background-size: 28px 28px;
+    background:
+      radial-gradient(#ff9f431f 1.6px, transparent 1.6px),
+      linear-gradient(to bottom, #fff0dc 0%, #fff9f3 55%);
+    background-size: 26px 26px, 100% 100%;
   }
 
-  /* ---------- Paper card: cream, wavy hand-drawn border ---------- */
+  /* ---------- Soft white card ---------- */
   .paper-card {
-    @apply border-[3px] border-ink bg-paper;
-    border-radius: 255px 15px 225px 15px / 15px 225px 15px 255px;
-    box-shadow: 4px 4px 0 #2b2b2b;
+    @apply bg-white;
+    border-radius: 24px;
+    box-shadow: 0 12px 32px -12px rgba(90, 70, 130, 0.18);
   }
   .paper-card-alt {
-    @apply border-[3px] border-ink bg-paper;
-    border-radius: 15px 225px 15px 255px / 225px 15px 255px 15px;
-    box-shadow: 4px 4px 0 #2b2b2b;
+    background: linear-gradient(135deg, #efe9ff 0%, #ffe9f1 100%);
+    border-radius: 24px;
+    box-shadow: 0 12px 32px -12px rgba(90, 70, 130, 0.18);
   }
 
-  /* ---------- Chunky buttons: 3px ink border, flat fill, hard shadow ---------- */
+  /* ---------- Chunky pill buttons ---------- */
   .btn-chunky {
-    @apply inline-flex cursor-pointer select-none items-center justify-center gap-2 border-[3px] border-ink px-5 py-2.5 font-display text-xl font-extrabold uppercase leading-none tracking-wide transition active:translate-x-[3px] active:translate-y-[3px] active:shadow-none disabled:cursor-not-allowed disabled:opacity-50;
-    border-radius: 10px;
-    box-shadow: 4px 4px 0 #2b2b2b;
-  }
-  .btn-blue { @apply btn-chunky bg-btnblue text-white; }
-  .btn-yellow { @apply btn-chunky bg-btnyellow text-ink; }
-  .btn-pink { @apply btn-chunky bg-btnpink text-ink; }
-  .btn-cream { @apply btn-chunky bg-paper text-ink; }
-  .btn-green { @apply btn-chunky bg-grass text-ink; }
-  .btn-sm {
-    @apply px-3 py-1.5 text-base;
-    box-shadow: 3px 3px 0 #2b2b2b;
-  }
-
-  /* ---------- Small pill tags (10 MIN / 3 LEFT / 12 FRIENDS) ---------- */
-  .pill {
-    @apply inline-flex items-center gap-1 border-[2.5px] border-ink px-3 py-0.5 font-display text-sm font-extrabold uppercase leading-tight tracking-wide;
+    @apply inline-flex cursor-pointer select-none items-center justify-center gap-2 px-6 py-3 font-display text-lg font-extrabold leading-none transition active:scale-95 disabled:cursor-not-allowed disabled:opacity-50;
     border-radius: 999px;
-    box-shadow: 2px 2px 0 #2b2b2b;
+    box-shadow: 0 8px 20px -8px rgba(43, 43, 43, 0.4);
+  }
+  .btn-blue { @apply btn-chunky bg-playblue text-white; }
+  .btn-yellow { @apply btn-chunky bg-playyellow text-ink; }
+  .btn-pink { @apply btn-chunky bg-playpink text-white; }
+  .btn-cream {
+    @apply btn-chunky bg-white text-ink;
+    border: 2px solid #f0e4d2;
+    box-shadow: 0 8px 20px -10px rgba(43, 43, 43, 0.25);
+  }
+  .btn-green { @apply btn-chunky bg-playgreen text-ink; }
+  .btn-gradient {
+    @apply btn-chunky text-white;
+    background: linear-gradient(135deg, #ff6b9d 0%, #8b5cf6 100%);
+    box-shadow: 0 10px 24px -8px rgba(255, 107, 157, 0.6);
+  }
+  .btn-sm {
+    @apply px-4 py-2 text-sm;
   }
 
-  /* ---------- Boards ---------- */
+  /* ---------- Soft pill tags ---------- */
+  .pill {
+    @apply inline-flex items-center gap-1 bg-butter px-3 py-1 font-display text-sm font-extrabold leading-tight text-ink;
+    border-radius: 999px;
+  }
+
+  /* ---------- Tinted boards (soft) ---------- */
   .board-brown {
-    @apply border-[3px] border-ink bg-boardbrown;
-    border-radius: 10px;
-    box-shadow: 5px 5px 0 #2b2b2b;
+    @apply bg-peach;
+    border-radius: 24px;
+    box-shadow: 0 12px 32px -12px rgba(90, 70, 130, 0.18);
   }
   .board-red {
-    @apply border-[3px] border-ink bg-boardred;
-    border-radius: 10px;
-    box-shadow: 5px 5px 0 #2b2b2b;
+    @apply bg-blush;
+    border-radius: 24px;
+    box-shadow: 0 12px 32px -12px rgba(90, 70, 130, 0.18);
   }
   .board-cream {
-    @apply border-[3px] border-ink bg-paper;
-    border-radius: 10px;
-    box-shadow: 5px 5px 0 #2b2b2b;
+    @apply bg-white;
+    border-radius: 24px;
+    box-shadow: 0 12px 32px -12px rgba(90, 70, 130, 0.18);
   }
 
-  /* ---------- Metal chain (horizontal divider with hanging tags) ---------- */
+  /* ---------- Metal chain (retired — kept as no-op for safety) ---------- */
   .chain-metal {
-    height: 16px;
-    background-image:
-      radial-gradient(circle at 8px 8px, transparent 4.5px, #9a9a9a 5px, #6f6f6f 7px, transparent 7.5px),
-      radial-gradient(circle at 8px 8px, transparent 4.5px, #b5b5b5 5px, #8a8a8a 7px, transparent 7.5px);
-    background-size: 17px 16px, 17px 16px;
-    background-position: 0 0, 8.5px 0;
-    background-repeat: repeat-x;
+    display: none;
   }
 
-  /* ---------- Circular hanging tag (on the chain) ---------- */
+  /* ---------- Soft circular icon button ---------- */
   .hang-circle {
-    @apply relative flex h-12 w-12 shrink-0 items-center justify-center rounded-full border-[3px] border-ink;
-    box-shadow: 2px 2px 0 #2b2b2b;
-  }
-  .hang-circle::before {
-    content: "";
-    position: absolute;
-    top: -11px;
-    left: 50%;
-    transform: translateX(-50%);
-    width: 11px;
-    height: 11px;
-    border-radius: 9999px;
-    border: 3px solid #2b2b2b;
-    background: #fffef5;
+    @apply relative flex h-14 w-14 shrink-0 items-center justify-center rounded-full text-white transition active:scale-95;
+    box-shadow: 0 8px 18px -8px rgba(43, 43, 43, 0.45);
   }
   .hang-circle-active {
     outline: 3px solid #ffd54f;
-    outline-offset: 2px;
+    outline-offset: 3px;
   }
 
-  /* ---------- Torn-paper date tag ---------- */
+  /* ---------- Date + XP pills (top bar) ---------- */
   .date-tag {
-    @apply inline-flex flex-col items-center bg-paper px-2.5 py-1 font-display text-sm font-extrabold uppercase leading-none tracking-wide;
-    border: 2.5px solid #2b2b2b;
-    box-shadow: 2px 2px 0 #2b2b2b;
-    transform: rotate(-4deg);
-    clip-path: polygon(2% 8%, 98% 0%, 100% 92%, 0% 100%);
+    @apply inline-flex items-center gap-1.5 rounded-full bg-white px-3.5 py-1.5 font-display text-sm font-extrabold text-ink;
+    box-shadow: 0 6px 16px -8px rgba(90, 70, 130, 0.25);
   }
-
-  /* ---------- Brown wallet ---------- */
   .wallet {
-    @apply inline-flex items-center gap-1.5 border-[2.5px] border-ink bg-walletbrown px-3 py-1.5 font-display text-base font-extrabold text-paper;
-    border-radius: 5px 5px 9px 9px;
-    box-shadow: 2px 2px 0 #2b2b2b;
+    @apply inline-flex items-center gap-1.5 rounded-full bg-butter px-3.5 py-1.5 font-display text-sm font-extrabold text-ink;
+    box-shadow: 0 6px 16px -8px rgba(90, 70, 130, 0.25);
   }
 
-  /* ---------- Round icon buttons (gear / book) ---------- */
+  /* ---------- Round icon buttons ---------- */
   .icon-round {
-    @apply flex h-10 w-10 items-center justify-center rounded-full border-[2.5px] border-ink bg-paper;
-    box-shadow: 2px 2px 0 #2b2b2b;
+    @apply flex h-11 w-11 items-center justify-center rounded-full bg-white text-ink transition active:scale-95;
+    box-shadow: 0 8px 18px -8px rgba(43, 43, 43, 0.35);
   }
 
-  /* ---------- Bottom nav paper tags ---------- */
+  /* ---------- Bottom nav tiles ---------- */
   .nav-tag {
-    @apply flex flex-col items-center justify-center gap-1 border-[2.5px] border-ink bg-paper px-2 py-2 font-display text-[11px] font-extrabold uppercase leading-none tracking-wide transition active:translate-x-[2px] active:translate-y-[2px] active:shadow-none;
-    border-radius: 7px;
-    box-shadow: 2px 2px 0 #2b2b2b;
+    @apply flex flex-col items-center justify-center gap-1 rounded-[20px] bg-white px-2 py-2.5 font-display text-[11px] font-extrabold leading-none text-ink/70 transition active:scale-95;
+    box-shadow: 0 8px 18px -10px rgba(90, 70, 130, 0.25);
     min-width: 0;
   }
   .nav-tag-active {
-    @apply bg-btnyellow;
+    @apply bg-butter text-ink;
+    box-shadow: 0 8px 18px -10px rgba(255, 159, 67, 0.5);
   }
 
-  /* ---------- Washi tape strip ---------- */
+  /* ---------- Washi tape strip (soft) ---------- */
   .washi::before {
     content: "";
     position: absolute;
@@ -169,46 +149,89 @@ body {
     transform: translateX(-50%) rotate(-3deg);
     width: 84px;
     height: 24px;
-    background: #ffd54f99;
-    border-left: 2px dashed #2b2b2b44;
-    border-right: 2px dashed #2b2b2b44;
+    background: #ffd54f66;
+    border-radius: 4px;
   }
 
   /* ---------- Inputs ---------- */
   .input {
-    @apply w-full border-[3px] border-ink bg-white px-3.5 py-2.5 font-body text-sm font-bold text-ink outline-none transition placeholder:font-semibold placeholder:text-ink/35 focus:bg-btnyellow/15;
-    border-radius: 8px;
-    box-shadow: 2px 2px 0 #2b2b2b;
+    @apply w-full rounded-2xl border-2 border-creamdark bg-white px-4 py-2.5 font-body text-sm font-bold text-ink outline-none transition placeholder:font-semibold placeholder:text-ink/35 focus:border-playpink;
+    box-shadow: 0 4px 12px -6px rgba(90, 70, 130, 0.15);
+  }
+  .input:focus {
+    box-shadow: 0 0 0 4px rgba(255, 107, 157, 0.15);
   }
   .label {
-    @apply mb-1.5 block font-display text-lg font-extrabold uppercase tracking-wide text-ink;
+    @apply mb-1.5 block font-display text-lg font-extrabold text-ink;
   }
 
-  /* ---------- Section titles: chunky all-caps ---------- */
+  /* ---------- Section titles: friendly chunky, not shouty ---------- */
   .title-chunky {
-    @apply font-display text-4xl font-extrabold uppercase leading-none tracking-wide text-ink md:text-5xl;
-    text-shadow: 2px 2px 0 #fffef555;
+    @apply font-display text-4xl font-extrabold leading-tight text-ink md:text-5xl;
   }
   .title-chunky-light {
-    @apply font-display text-4xl font-extrabold uppercase leading-none tracking-wide text-paper md:text-5xl;
-    text-shadow: 2px 2px 0 #00000055;
+    @apply font-display text-4xl font-extrabold leading-tight text-ink md:text-5xl;
   }
 
-  /* ---------- Purple machine (NEW JOB modal) ---------- */
+  /* ---------- Modal card (soft white) ---------- */
   .machine {
-    @apply border-[3px] border-ink bg-machinepurple;
-    border-radius: 18px;
-    box-shadow: 6px 6px 0 #2b2b2b;
+    @apply bg-white;
+    border-radius: 28px;
+    box-shadow: 0 24px 60px -12px rgba(90, 70, 130, 0.3);
+    animation: pop-in 0.25s ease-out;
   }
   .machine-slot {
-    @apply border-[3px] border-dashed border-ink/50 bg-paper;
-    border-radius: 6px;
+    @apply rounded-2xl border-[3px] border-dashed border-ink/15 bg-cream;
   }
 
-  /* ---------- Dashed input area (like NEW JOB text field) ---------- */
+  /* ---------- Dashed input area ---------- */
   .input-dashed {
-    @apply w-full border-[3px] border-dashed border-ink/60 bg-paper px-3.5 py-2.5 font-body text-sm font-bold text-ink outline-none placeholder:text-ink/35;
-    border-radius: 8px;
+    @apply w-full rounded-2xl border-[3px] border-dashed border-ink/20 bg-cream px-4 py-2.5 font-body text-sm font-bold text-ink outline-none placeholder:text-ink/35 focus:border-playpink;
+  }
+
+  /* ---------- Daily check-in stat tile ---------- */
+  .stat-tile {
+    border-radius: 24px;
+    box-shadow: 0 10px 24px -12px rgba(90, 70, 130, 0.2);
+  }
+
+  /* ---------- Selectable source tab card (Create-a-Pack modal) ---------- */
+  .tab-card {
+    @apply flex w-full flex-col items-center gap-1.5 rounded-[20px] border-[3px] border-transparent bg-white px-2 py-3.5 font-display text-sm font-extrabold text-ink/70 transition active:scale-95;
+    box-shadow: 0 8px 18px -10px rgba(90, 70, 130, 0.25);
+  }
+  .tab-card-active {
+    border-color: currentColor;
+    @apply text-ink;
+    box-shadow: 0 10px 22px -10px rgba(90, 70, 130, 0.35);
+  }
+
+  /* ---------- Progress bar ---------- */
+  .progress-track {
+    @apply h-3.5 w-full overflow-hidden rounded-full bg-ink/10;
+  }
+  .progress-fill {
+    background: linear-gradient(90deg, #ff6b9d, #8b5cf6);
+    @apply h-full rounded-full transition-all duration-500;
+  }
+
+  /* ---------- Week streak dots ---------- */
+  .week-dot {
+    @apply flex h-11 w-11 flex-col items-center justify-center rounded-full bg-white font-display text-sm font-extrabold text-ink/50;
+    box-shadow: 0 6px 14px -8px rgba(90, 70, 130, 0.3);
+  }
+  .week-dot-today {
+    @apply bg-playyellow text-ink;
+    box-shadow: 0 8px 18px -8px rgba(255, 159, 67, 0.7);
+    transform: scale(1.12);
+  }
+
+  /* ---------- Flashcard flip ---------- */
+  .flip-card {
+    transition: transform 0.25s ease;
+  }
+  .flip-card:active {
+    transform: scale(0.98);
   }
 }
 
@@ -219,6 +242,24 @@ body {
 }
 .animate-bob {
   animation: creature-bob 3s ease-in-out infinite;
+}
+
+/* Pop-in for modals and cards */
+@keyframes pop-in {
+  0% { opacity: 0; transform: scale(0.95) translateY(8px); }
+  100% { opacity: 1; transform: scale(1) translateY(0); }
+}
+.animate-pop-in {
+  animation: pop-in 0.25s ease-out;
+}
+
+/* Gentle float for hero decorations */
+@keyframes float-soft {
+  0%, 100% { transform: translateY(0) rotate(0deg); }
+  50% { transform: translateY(-8px) rotate(2deg); }
+}
+.animate-float {
+  animation: float-soft 4s ease-in-out infinite;
 }
 
 /* ---------- Print: clean Q/A sheet ---------- */

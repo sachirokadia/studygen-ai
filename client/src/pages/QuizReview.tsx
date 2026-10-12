@@ -4,7 +4,7 @@ import { useQuery } from "@tanstack/react-query";
 import clsx from "clsx";
 import { api, type Quiz, type QuizAttempt } from "../lib/api";
 import { useLang } from "../lib/i18n";
-import { Button, EmptyState, ErrorState, LoadingState, PageBg } from "../components/ui";
+import { EmptyState, ErrorState, LoadingState, PageBg } from "../components/ui";
 import Creature from "../components/creatures";
 
 function Stars({ pct }: { pct: number }) {
@@ -62,10 +62,11 @@ export default function QuizReview() {
   return (
     <div className="mx-auto max-w-xl">
       <PageBg variant="night" />
-      <div className="paper-card washi relative mt-8 p-8 text-center">
+      <div className="paper-card washi animate-pop-in relative mt-8 !rounded-[28px] p-8 text-center">
         <Creature kind={pct >= 50 ? "dog" : "grey"} size={120} className="mx-auto animate-bob" />
+        <h2 className="mt-3 font-display text-4xl font-extrabold">{t("review.allDone")}</h2>
         <Stars pct={pct} />
-        <p className="mt-4 font-display text-2xl font-extrabold uppercase text-ink/60">{t("quiz.score")}</p>
+        <p className="mt-4 font-display text-xl font-extrabold text-ink/60">{t("quiz.score")}</p>
         <p className="mt-1 font-display text-6xl font-extrabold">
           {attempt.score} {t("quiz.outOf")} {attempt.total}!
         </p>
@@ -80,9 +81,9 @@ export default function QuizReview() {
         )}
 
         <Link to={`/quiz/${id}`} className="mt-6 block">
-          <Button variant="green" className="w-full !py-4 !text-2xl">
+          <button className="btn-gradient w-full !py-4 !text-2xl">
             {t("quiz.practiceAgain")}
-          </Button>
+          </button>
         </Link>
         <Link to={`/decks/${quiz.deckId}`} className="btn-cream btn-sm mt-3 inline-block">
           {t("btn.back")}

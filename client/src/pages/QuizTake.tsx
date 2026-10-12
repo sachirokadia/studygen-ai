@@ -4,7 +4,7 @@ import { Link, useNavigate, useParams } from "react-router-dom";
 import clsx from "clsx";
 import { api, type Quiz } from "../lib/api";
 import { useLang } from "../lib/i18n";
-import { Button, Card, EmptyState, ErrorState, LoadingState, PageBg, Pill } from "../components/ui";
+import { Button, EmptyState, ErrorState, LoadingState, PageBg, Pill } from "../components/ui";
 
 function shuffle<T>(arr: T[]): T[] {
   const a = [...arr];
@@ -109,33 +109,47 @@ export default function QuizTake() {
       <h1 className="title-chunky-light text-center">{quiz.title}</h1>
 
       <div className="mb-6 mt-4 flex justify-center">
-        <Pill color="bg-machinepurple" className="!text-xl">
+        <Pill className="!bg-lav !text-xl">
           {qi + 1} {t("review.of")} {questions.length}
         </Pill>
       </div>
 
-      <Card>
+      <div className="paper-card !rounded-[28px] p-6 md:p-8">
         <div id="quiz-card">
-        <p className="font-display text-3xl font-extrabold leading-snug">{q.question}</p>
+        <p className="font-display text-2xl font-extrabold leading-snug md:text-3xl">{q.question}</p>
         <div className="mt-6 space-y-3">
-          {q.options.map((opt, oi) => (
-            <button
-              key={oi}
-              onClick={() => {
-                setAnswers((a) => ({ ...a, [q.id]: oi }));
-                setMissedMsg(false);
-              }}
-              className={clsx(
-                "btn-cream w-full !py-4 text-left !text-lg",
-                answers[q.id] === oi && "!bg-btnyellow",
-              )}
-            >
-              <span className="font-body text-base font-bold">{opt}</span>
-            </button>
-          ))}
+          {q.options.map((opt, oi) => {
+            const selected = answers[q.id] === oi;
+            const tints = ["bg-blush", "bg-ice", "bg-butter", "bg-mint"];
+            const solids = ["bg-playpink", "bg-playblue", "bg-playorange", "bg-playgreen"];
+            return (
+              <button
+                key={oi}
+                onClick={() => {
+                  setAnswers((a) => ({ ...a, [q.id]: oi }));
+                  setMissedMsg(false);
+                }}
+                className={clsx(
+                  "flex w-full items-center gap-3 rounded-[20px] px-4 py-3.5 text-left transition active:scale-[0.98]",
+                  selected ? clsx(solids[oi % solids.length], "text-white") : tints[oi % tints.length],
+                )}
+                style={{ boxShadow: selected ? "0 10px 22px -10px rgba(43,43,43,0.5)" : "0 6px 14px -8px rgba(90,70,130,0.25)" }}
+              >
+                <span
+                  className={clsx(
+                    "flex h-9 w-9 shrink-0 items-center justify-center rounded-full font-display text-base font-extrabold",
+                    selected ? "bg-white/30 text-white" : "bg-white text-ink",
+                  )}
+                >
+                  {String.fromCharCode(65 + oi)}
+                </span>
+                <span className="font-body text-base font-bold">{opt}</span>
+              </button>
+            );
+          })}
         </div>
         </div>
-      </Card>
+      </div>
 
       {missedMsg && (
         <div className="paper-card mt-4 border-btnyellow p-4 text-center">

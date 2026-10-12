@@ -103,22 +103,21 @@ export function TextArea(props: TextareaHTMLAttributes<HTMLTextAreaElement>) {
   return <textarea {...props} className={clsx("input min-h-[120px]", props.className)} />;
 }
 
-/** Purple machine modal (Screen 6 NEW JOB style). */
+/** Soft white modal card. */
 export function Modal({ title, onClose, children }: { title: string; onClose: () => void; children: ReactNode }) {
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-ink/60 p-4" onClick={onClose}>
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-ink/40 p-4 backdrop-blur-[2px]" onClick={onClose}>
       <div className="machine max-h-[90vh] w-full max-w-lg overflow-y-auto p-5 md:p-6" onClick={(e) => e.stopPropagation()}>
-        <div className="mb-1 flex items-center justify-between gap-3">
-          <span className="pill !bg-btnyellow !text-base">{title}</span>
+        <div className="mb-4 flex items-center justify-between gap-3">
+          <h2 className="font-display text-2xl font-extrabold text-ink">{title}</h2>
           <button
             onClick={onClose}
-            className="icon-round !bg-btnpink"
+            className="icon-round !bg-blush !text-playpink"
             aria-label="Close"
           >
             <X className="h-5 w-5" strokeWidth={3} />
           </button>
         </div>
-        <div className="chain-metal my-3 opacity-80" aria-hidden="true" />
         <div className="font-body text-ink">{children}</div>
       </div>
     </div>
