@@ -75,7 +75,12 @@ export async function chatCompletion(opts: CompletionOptions): Promise<string> {
         choices?: Array<{ message?: { content?: string } }>;
       };
       const content = data.choices?.[0]?.message?.content;
-      if (!content) throw new HttpError(502, "AI provider returned an empty response.");
+      if (!content) {
+        // Groq intermittently returns 200 with empty content when throttled — retry it
+        lastErr = new HttpError(502, "AI provider returned an empty response.");
+        if (attempt < 2) await sleep(1000 * (attempt + 1));
+        continue;
+      }
       return content;
     }
 
