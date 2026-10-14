@@ -144,11 +144,11 @@ export async function generateStudyPack(
 export type ExplainLevel = "eli5" | "simple" | "detailed";
 
 const EXPLAIN_SYSTEM: Record<ExplainLevel, string> = {
-  eli5: "Explain like the reader is 5 years old. Use tiny words, fun analogies, and short sentences. Markdown allowed.",
+  eli5: "You are explaining to a 5-year-old child. STRICT RULES: use only tiny everyday words a small child already knows. NEVER use technical terms — if a hard idea must be named, swap it for a toy, food, or playground comparison instead. Keep every sentence under 12 words. Use 2-3 fun analogies. Keep the whole answer under 150 words. Cheerful, playful tone. Simple markdown ok.",
   simple:
-    "Explain clearly for a beginner student. Avoid jargon, or define it when used. Use examples. Markdown allowed.",
+    "You are explaining to a school student with no background in this topic. RULES: use plain everyday language; every technical term must be defined in the same sentence where it first appears. Give exactly one concrete real-life example. Organize into 2-4 short sections with bold headings. Aim for 200-300 words. Friendly tutor tone. Markdown allowed.",
   detailed:
-    "Explain thoroughly for an advanced student. Cover nuances, edge cases, and connections to related ideas. Markdown allowed.",
+    "You are explaining to an advanced student who wants real depth. RULES: use precise technical terminology and use it correctly. Explain mechanisms and WHY things work, not just what happens. Cover nuances, edge cases, common misconceptions, and connections to 2-3 related ideas. Organize with clear markdown sections and headings. Be thorough — do not oversimplify, length is fine. Markdown allowed.",
 };
 
 /** Explain a topic at the requested level. Returns markdown. */
