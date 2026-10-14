@@ -962,6 +962,7 @@ async function chatCompletion(messages, opts = {}) {
     ...(opts.jsonMode ? { response_format: { type: "json_object" } } : {}),
     ...(opts.maxTokens ? { max_tokens: opts.maxTokens } : {}),
     ...(opts.temperature !== undefined ? { temperature: opts.temperature } : {}),
+    ...(opts.reasoningEffort ? { reasoning_effort: opts.reasoningEffort } : {}),
   });
   let lastErr = null;
   for (let attempt = 0; attempt < 3; attempt++) {
@@ -1146,7 +1147,7 @@ async function handleExplain(userId, body) {
       { role: "system", content: EXPLAIN_SYSTEM[level] },
       { role: "user", content: `Explain this topic:\n${topic.slice(0, 2000)}` },
     ],
-    { temperature: 0.7, maxTokens: EXPLAIN_MAX_TOKENS[level] },
+    { temperature: 0.7, maxTokens: EXPLAIN_MAX_TOKENS[level], reasoningEffort: "low" },
   );
   return { status: 200, body: { explanation, level } };
 }

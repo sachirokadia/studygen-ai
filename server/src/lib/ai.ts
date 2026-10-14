@@ -38,6 +38,7 @@ type CompletionOptions = {
   jsonMode?: boolean;
   maxTokens?: number;
   temperature?: number;
+  reasoningEffort?: "low" | "medium" | "high";
 };
 
 const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
@@ -51,6 +52,7 @@ export async function chatCompletion(opts: CompletionOptions): Promise<string> {
     ...(opts.jsonMode ? { response_format: { type: "json_object" } } : {}),
     ...(opts.maxTokens ? { max_tokens: opts.maxTokens } : {}),
     ...(opts.temperature !== undefined ? { temperature: opts.temperature } : {}),
+    ...(opts.reasoningEffort ? { reasoning_effort: opts.reasoningEffort } : {}),
   });
   let lastErr: unknown = null;
   for (let attempt = 0; attempt < 3; attempt++) {
@@ -189,6 +191,7 @@ export async function explainTopic(topic: string, level: ExplainLevel = "simple"
     ],
     temperature: 0.7,
     maxTokens,
+    reasoningEffort: "low",
   });
 }
 
