@@ -40,35 +40,55 @@ type CompletionOptions = {
   temperature?: number;
 };
 
-/** Raw text completion. */
+const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
+
+/** Raw text completion. Retries rate limits and transient provider errors. */
 export async function chatCompletion(opts: CompletionOptions): Promise<string> {
   const { apiKey, baseUrl, model } = aiConfig();
-  const res = await fetch(`${baseUrl.replace(/\/$/, "")}/chat/completions`, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      Authorization: `Bearer ${apiKey}`,
-    },
-    body: JSON.stringify({
-      model,
-      messages: opts.messages,
-      ...(opts.jsonMode ? { response_format: { type: "json_object" } } : {}),
-      ...(opts.maxTokens ? { max_tokens: opts.maxTokens } : {}),
-      ...(opts.temperature !== undefined ? { temperature: opts.temperature } : {}),
-    }),
+  const reqBody = JSON.stringify({
+    model,
+    messages: opts.messages,
+    ...(opts.jsonMode ? { response_format: { type: "json_object" } } : {}),
+    ...(opts.maxTokens ? { max_tokens: opts.maxTokens } : {}),
+    ...(opts.temperature !== undefined ? { temperature: opts.temperature } : {}),
   });
+  let lastErr: unknown = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    let res: Response;
+    try {
+      res = await fetch(`${baseUrl.replace(/\/$/, "")}/chat/completions`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${apiKey}`,
+        },
+        body: reqBody,
+      });
+    } catch (e) {
+      lastErr = new HttpError(502, `AI provider unreachable: ${(e as Error)?.message || e}`);
+      if (attempt < 2) await sleep(1000 * (attempt + 1));
+      continue;
+    }
 
-  if (!res.ok) {
+    if (res.ok) {
+      const data = (await res.json()) as {
+        choices?: Array<{ message?: { content?: string } }>;
+      };
+      const content = data.choices?.[0]?.message?.content;
+      if (!content) throw new HttpError(502, "AI provider returned an empty response.");
+      return content;
+    }
+
     const body = await res.text().catch(() => "");
+    // retry on rate limits and server errors; fail fast on client errors
+    if (res.status === 429 || res.status >= 500) {
+      lastErr = new HttpError(res.status, `AI provider error (${res.status}): ${body.slice(0, 300)}`);
+      if (attempt < 2) await sleep(1000 * (attempt + 1));
+      continue;
+    }
     throw new HttpError(res.status, `AI provider error (${res.status}): ${body.slice(0, 300)}`);
   }
-
-  const data = (await res.json()) as {
-    choices?: Array<{ message?: { content?: string } }>;
-  };
-  const content = data.choices?.[0]?.message?.content;
-  if (!content) throw new HttpError(502, "AI provider returned an empty response.");
-  return content;
+  throw lastErr;
 }
 
 /** JSON completion: parses the model output, throws 502 on invalid JSON. */

@@ -952,33 +952,54 @@ function aiConfig() {
   };
 }
 
+const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
+
 async function chatCompletion(messages, opts = {}) {
   const { apiKey, baseUrl, model } = aiConfig();
-  const res = await fetch(`${baseUrl}/chat/completions`, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      Authorization: `Bearer ${apiKey}`,
-    },
-    body: JSON.stringify({
-      model,
-      messages,
-      ...(opts.jsonMode ? { response_format: { type: "json_object" } } : {}),
-      ...(opts.maxTokens ? { max_tokens: opts.maxTokens } : {}),
-      ...(opts.temperature !== undefined ? { temperature: opts.temperature } : {}),
-    }),
+  const reqBody = JSON.stringify({
+    model,
+    messages,
+    ...(opts.jsonMode ? { response_format: { type: "json_object" } } : {}),
+    ...(opts.maxTokens ? { max_tokens: opts.maxTokens } : {}),
+    ...(opts.temperature !== undefined ? { temperature: opts.temperature } : {}),
   });
-  if (!res.ok) {
+  let lastErr = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    let res;
+    try {
+      res = await fetch(`${baseUrl}/chat/completions`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${apiKey}`,
+        },
+        body: reqBody,
+      });
+    } catch (e) {
+      // network-level failure — retry with backoff
+      lastErr = new HttpError(502, `AI provider unreachable: ${(e && e.message) || e}`);
+      if (attempt < 2) await sleep(1000 * (attempt + 1));
+      continue;
+    }
+    if (res.ok) {
+      const data = await res.json();
+      const content =
+        data.choices && data.choices[0] && data.choices[0].message
+          ? data.choices[0].message.content
+          : null;
+      if (!content) throw new HttpError(502, "AI provider returned an empty response.");
+      return content;
+    }
     const text = await res.text().catch(() => "");
+    // retry on rate limits and server errors; fail fast on client errors
+    if (res.status === 429 || res.status >= 500) {
+      lastErr = new HttpError(res.status, `AI provider error (${res.status}): ${text.slice(0, 300)}`);
+      if (attempt < 2) await sleep(1000 * (attempt + 1));
+      continue;
+    }
     throw new HttpError(res.status, `AI provider error (${res.status}): ${text.slice(0, 300)}`);
   }
-  const data = await res.json();
-  const content =
-    data.choices && data.choices[0] && data.choices[0].message
-      ? data.choices[0].message.content
-      : null;
-  if (!content) throw new HttpError(502, "AI provider returned an empty response.");
-  return content;
+  throw lastErr;
 }
 
 const STUDY_PACK_SYSTEM = `You are StudyGen, an AI study companion. Given source content, produce a study pack as a single JSON object with exactly these keys:
