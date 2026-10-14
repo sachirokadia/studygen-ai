@@ -1129,7 +1129,10 @@ async function handleStudyPack(userId, body) {
 
 const EXPLAIN_LEVELS = ["eli5", "simple", "detailed"];
 
-const EXPLAIN_MAX_TOKENS = { eli5: 400, simple: 800, detailed: 1200 };
+// Caps need headroom: gpt-oss is a reasoning model and burns tokens on
+// internal thinking before answering. Too small a cap = thinking eats the
+// whole budget and Groq returns 200 with empty content.
+const EXPLAIN_MAX_TOKENS = { eli5: 1000, simple: 1500, detailed: 2000 };
 
 async function handleExplain(userId, body) {
   const { topic, level = "simple" } = body || {};

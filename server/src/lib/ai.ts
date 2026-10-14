@@ -178,7 +178,10 @@ const EXPLAIN_SYSTEM: Record<ExplainLevel, string> = {
 
 /** Explain a topic at the requested level. Returns markdown. */
 export async function explainTopic(topic: string, level: ExplainLevel = "simple"): Promise<string> {
-  const maxTokens = { eli5: 400, simple: 800, detailed: 1200 }[level];
+  // Headroom matters: gpt-oss is a reasoning model and burns tokens on internal
+  // thinking before answering. Too small a cap = thinking eats the whole
+  // budget and Groq returns 200 with empty content.
+  const maxTokens = { eli5: 1000, simple: 1500, detailed: 2000 }[level];
   return chatCompletion({
     messages: [
       { role: "system", content: EXPLAIN_SYSTEM[level] },
