@@ -1103,6 +1103,8 @@ async function handleStudyPack(userId, body) {
 
 const EXPLAIN_LEVELS = ["eli5", "simple", "detailed"];
 
+const EXPLAIN_MAX_TOKENS = { eli5: 400, simple: 800, detailed: 1200 };
+
 async function handleExplain(userId, body) {
   const { topic, level = "simple" } = body || {};
   if (typeof topic !== "string" || topic.trim().length < 2 || topic.length > 2000)
@@ -1115,7 +1117,7 @@ async function handleExplain(userId, body) {
       { role: "system", content: EXPLAIN_SYSTEM[level] },
       { role: "user", content: `Explain this topic:\n${topic.slice(0, 2000)}` },
     ],
-    { temperature: 0.7, maxTokens: 2000 },
+    { temperature: 0.7, maxTokens: EXPLAIN_MAX_TOKENS[level] },
   );
   return { status: 200, body: { explanation, level } };
 }

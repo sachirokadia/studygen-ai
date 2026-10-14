@@ -153,13 +153,14 @@ const EXPLAIN_SYSTEM: Record<ExplainLevel, string> = {
 
 /** Explain a topic at the requested level. Returns markdown. */
 export async function explainTopic(topic: string, level: ExplainLevel = "simple"): Promise<string> {
+  const maxTokens = { eli5: 400, simple: 800, detailed: 1200 }[level];
   return chatCompletion({
     messages: [
       { role: "system", content: EXPLAIN_SYSTEM[level] },
       { role: "user", content: `Explain this topic:\n${topic.slice(0, 2000)}` },
     ],
     temperature: 0.7,
-    maxTokens: 2000,
+    maxTokens,
   });
 }
 
